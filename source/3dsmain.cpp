@@ -33,6 +33,7 @@
 #include "3dsmenu.h"
 #include "3dsui.h"
 #include "3dsfont.h"
+#include "3dsgbk.h"
 #include "3dsconfig.h"
 #include "3dsfiles.h"
 #include "3dsinput.h"
@@ -2312,6 +2313,7 @@ void emulatorLoop()
 int main()
 {
     emulatorInitialize();
+    gbk3dsLoadGBKImage();
     drawStartScreen();
     gspWaitForVBlank();
 
