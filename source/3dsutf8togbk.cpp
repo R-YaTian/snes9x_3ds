@@ -1,4 +1,3 @@
-
 #include <3ds.h>
 #include "port.h"
 

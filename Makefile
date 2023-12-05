@@ -307,7 +307,9 @@ define shader-as
 	echo "extern const u8" `(echo $(CURBIN) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`"[];" >> `(echo $(CURBIN) | tr . _)`.h
 	echo "extern const u32" `(echo $(CURBIN) | sed -e 's/^\([0-9]\)/_\1/' | tr . _)`_size";" >> `(echo $(CURBIN) | tr . _)`.h
 	picasso -o $(CURBIN) $1
-	bin2s $(CURBIN) | $(AS) -o $*.shbin.o
+	bin2s $(CURBIN) > $(CURBIN).s
+	sed -i "/#if defined/,\$$d" $(CURBIN).s
+	$(AS) $(CURBIN).s -o $*.shbin.o
 endef
 
 %.shbin.o %_shbin.h : %.v.pica %.g.pica
