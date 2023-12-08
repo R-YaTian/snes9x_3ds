@@ -569,8 +569,8 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     bool stateUsed = state == RADIO_ACTIVE || state == RADIO_ACTIVE_CHECKED;
                     if (stateUsed) {
                         std::ostringstream confirmMessage;
-                        confirmMessage << "Are you sure to overwrite save slot #" << slot << "?";
-                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Savestates", confirmMessage.str(), false);
+                        confirmMessage << "确定要覆盖即时存档槽位 #" << slot << "吗?";
+                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", confirmMessage.str(), false);
 
                         if (!confirmed) {
                             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
@@ -580,19 +580,19 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     }
                     
                     std::ostringstream oss;
-                    oss << "Saving into slot #" << slot;
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Savestates", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
+                    oss << "正在保存到槽位 #" << slot;
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
                     result = impl3dsSaveStateSlot(slot);
 
                     if (!result) {
-                        oss << " failed.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Savestates", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                        oss << " 失败.";
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                     }
                     else
                     {
-                        oss << " completed.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Savestates", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                        oss << " 完成.";
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                         if (CheckAndUpdate( settings3DS.CurrentSaveSlot, slot )) {
                             for (int i = 0; i < currentTab->MenuItems.size(); i++)
@@ -624,7 +624,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     SMenuTab dialogTab;
                     bool isDialog = false;
                     std::ostringstream oss;
-                    oss << "无法读取即时存档 #" << slot << "!";
+                    oss << "无法读取即时存档槽位 #" << slot << "!";
                     menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存即时存档失败", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk());
                     menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                 } else {
