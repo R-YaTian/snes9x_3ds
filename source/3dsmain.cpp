@@ -507,27 +507,27 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
     std::vector<SMenuItem> items;
 
     if (isPauseMenu) {
-        AddMenuHeader1(items, "CURRENT GAME"s);
+        AddMenuHeader1(items, "当前游戏"s);
         items.emplace_back([&closeMenu](int val) {
             closeMenu = true;
-        }, MenuItemType::Action, "  Resume"s, ""s);
+        }, MenuItemType::Action, "  继续游戏"s, ""s);
 
 
         items.emplace_back([&menuTab, &currentMenuTab, &closeMenu](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Reset Console", "This will restart the game. Are you sure?");
+            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "重启主机", "将会重启游戏,确定吗?");
 
             if (confirmed) {
                 impl3dsResetConsole();
                 closeMenu = true;
             }
-        }, MenuItemType::Action, "  Reset"s, ""s);
+        }, MenuItemType::Action, "  重启"s, ""s);
 
         items.emplace_back([&menuTab, &currentMenuTab](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Screenshot", "Saving screenshot...", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", "正在保存截图...", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
 
             const char *path;
             bool success = impl3dsTakeScreenshot(path, true);
@@ -535,21 +535,21 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
             if (success)
             {
                 char text[600];
-                snprintf(text, 600, "Screenshot saved to %s", path);
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Screenshot", text, Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                snprintf(text, 600, "截图已保存到%s", path);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", text, Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
             }
             else
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "Screenshot", "Failed to save screenshot!", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", "保存截图失败!", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                         
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
 
-        }, MenuItemType::Action, "  Take Screenshot"s, ""s);
+        }, MenuItemType::Action, "  截图"s, ""s);
 
         AddMenuHeader2(items, ""s);
 
         int groupId = 500; // necessary for radio group
 
-        AddMenuHeader2(items, "Save and Load"s);
+        AddMenuHeader2(items, "保存并读取"s);
         AddMenuHeader2(items, ""s);
 
         for (int slot = 1; slot <= SAVESLOTS_MAX; ++slot) {
@@ -570,8 +570,8 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     bool stateUsed = state == RADIO_ACTIVE || state == RADIO_ACTIVE_CHECKED;
                     if (stateUsed) {
                         std::ostringstream confirmMessage;
-                        confirmMessage << "确定要覆盖即时存档槽位 #" << slot << "吗?";
-                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", confirmMessage.str(), false);
+                        confirmMessage << "确定要覆盖存档位 #" << slot << "吗?";
+                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", confirmMessage.str(), false);
 
                         if (!confirmed) {
                             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
@@ -581,19 +581,19 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     }
                     
                     std::ostringstream oss;
-                    oss << "正在保存到槽位 #" << slot;
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
+                    oss << "正在保存到存档位 #" << slot;
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
                     result = impl3dsSaveStateSlot(slot);
 
                     if (!result) {
                         oss << " 失败.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                     }
                     else
                     {
                         oss << " 完成.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存槽位", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                         if (CheckAndUpdate( settings3DS.CurrentSaveSlot, slot )) {
                             for (int i = 0; i < currentTab->MenuItems.size(); i++)
@@ -625,7 +625,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     SMenuTab dialogTab;
                     bool isDialog = false;
                     std::ostringstream oss;
-                    oss << "无法读取即时存档槽位 #" << slot << "!";
+                    oss << "无法读取存档位 #" << slot << "!";
                     menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "保存即时存档失败", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk());
                     menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                 } else {
@@ -655,7 +655,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
 
     // display info message when user doesn't have provided any game thumbnails yet
     if (!thumbnailsAvailable) {
-        gameThumbnailMessage += "\n找不到缩略图，你可以在下列网站中下载缩略图.\ngithub.com/matbo87/snes9x_3ds-assets";
+        gameThumbnailMessage += "\n找不到缩略图,你可以在下列网站中下载缩略图.\ngithub.com/matbo87/snes9x_3ds-assets";
     }
 
     AddMenuPicker(items, "  游戏缩略图"s, "选择在\"加载游戏\"选项中显示的缩略图."s, makeOptionsForGameThumbnail(thumbnailOptions), settings3DS.GameThumbnailType, DIALOG_TYPE_INFO, true,
@@ -725,7 +725,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         items.emplace_back([&menuTab, &currentMenuTab, &closeMenu](int val) {
             std::ostringstream resetConfigDescription;
             std::string gameConfigDescription = " 并/或移除当前游戏配置.";
-            resetConfigDescription << "将初始化为默认设定" << (cfgFileAvailable == 3 ? gameConfigDescription : "") << ".初始化完成后将退出模拟器，重启模拟器以应用设置.";
+            resetConfigDescription << "将初始化为默认设定" << (cfgFileAvailable == 3 ? gameConfigDescription : "") << ".初始化完成后将退出模拟器,重启模拟器以应用设置.";
 
             SMenuTab dialogTab;
             bool isDialog = false;
@@ -742,13 +742,13 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
             
             switch (result) {
                 case 1:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定.如果问题仍然存在,请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 case 2:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除游戏设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除游戏设定.如果问题仍然存在,请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 case 3:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定和游戏设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定和游戏设定.如果问题仍然存在,请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 default:
                     menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "成功",  "已初始化设定.现在将退出模拟器", Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
@@ -883,7 +883,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设定"s);
     int secondScreenPickerId = 1000;
-    AddMenuPicker(items, "  副屏幕显示内容"s, "选择 \"游戏封面\" 请确认封面图片文件已配置好，否则将会显示默认图像."s, 
+    AddMenuPicker(items, "  副屏幕显示内容"s, "选择 \"游戏封面\" 请确认封面图片文件已配置好,否则将会显示默认图像."s, 
         makePickerOptions({"无", "游戏封面", "ROM信息"}), settings3DS.SecondScreenContent, DIALOG_TYPE_INFO, true,
                     [secondScreenPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.SecondScreenContent, val)) {
@@ -898,7 +898,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
 
 
     int gameBorderPickerId = 1500;
-    AddMenuPicker(items, "  边框"s, "选择 \"游戏指定\" 请确认边框图片文件已配置好，否则将显示黑色边框."s, 
+    AddMenuPicker(items, "  边框"s, "选择 \"游戏指定\" 请确认边框图片文件已配置好,否则将显示黑色边框."s, 
         makePickerOptions({"无", "默认", "游戏指定"}), settings3DS.GameBorder, DIALOG_TYPE_INFO, true,
                     [gameBorderPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.GameBorder, val)) {
@@ -952,7 +952,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
         []( int val ) { CheckAndUpdate( settings3DS.AutoSavestate, val ); });
     items.emplace_back(nullptr, MenuItemType::Textarea, "  (将在 \"savestates\" 文件夹创建一个*.auto.frz文件.)"s, ""s);
 
-    AddMenuPicker(items, "  SRAM自动保存延时"s, "当游戏太频繁写入SRAM到SD卡时，尝试60秒延时或者禁用自动保存."s, makeOptionsForAutoSaveSRAMDelay(), settings3DS.SRAMSaveInterval, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  SRAM自动保存延时"s, "当游戏太频繁写入SRAM到SD卡时,尝试60秒延时或者禁用自动保存."s, makeOptionsForAutoSaveSRAMDelay(), settings3DS.SRAMSaveInterval, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.SRAMSaveInterval, val ); });
     AddMenuCheckbox(items, "  暂停时强制写入SRAM"s, settings3DS.ForceSRAMWriteOnPause,
                     []( int val ) { CheckAndUpdate( settings3DS.ForceSRAMWriteOnPause, val ); });
@@ -1712,7 +1712,7 @@ int showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab
     int option = menu3dsShowDialog(
         dialogTab, isDialog, currentMenuTab, menuTab, 
         "文件菜单设定", 
-        "如果未设定默认文件夹位置，启动时将会自动调整到上次运行ROM所在的文件夹."s, 
+        "如果未设定默认文件夹位置,启动时将会自动调整到上次运行ROM所在的文件夹."s, 
         Themes[settings3DS.Theme].dialogColorInfo, 
         makeOptionsForFileMenu({"设定当前目录为默认文件夹", "重置默认文件夹", "在当前文件夹随机运行ROM", "删除选定的游戏" }, hasDeleteGameOption));
     
@@ -1922,7 +1922,7 @@ void menuPause()
         static char message[_MAX_PATH] = "";
 
         if (slotLoaded) {
-			snprintf(message, _MAX_PATH, "槽位 #%d 已读取", settings3DS.CurrentSaveSlot);
+			snprintf(message, _MAX_PATH, "存档位 #%d 已读取", settings3DS.CurrentSaveSlot);
         }
 
         ui3dsSetSecondScreenDialogState(HIDDEN);
@@ -1972,7 +1972,7 @@ void menuSetupCheats(std::vector<SMenuItem>& cheatMenu)
     else {
         static char message[_MAX_PATH];
         snprintf(message, _MAX_PATH - 1,
-            "\n未发现此游戏的金手指. 要启用金手指，请将\n"
+            "\n未发现此游戏的金手指. 要启用金手指,请将\n"
             "\"%s.chx\" (或是 *.cht) 复制到SD卡的 \"%s\" 文件夹.\n"
             "\n\n支持Game-Genie 和 Pro Action Replay Codes.\n"
             "*.chx 的格式是 [Y/N],[CheatCode],[Name].\n"
