@@ -8,6 +8,7 @@
 
 #include "3dssettings.h"
 #include "3dsfiles.h"
+#include "3dsutf8togbk.h"
 
 inline std::string operator "" s(const char* s, size_t length) {
     return std::string(s, length);
@@ -318,6 +319,8 @@ StoredFile file3dsAddFileBufferToMemory(const std::string& id, const std::string
 bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::string>& extensions, const char* startDir)
 {
     files.clear();
+    std::vector<DirectoryEntry> dirs;
+    std::vector<DirectoryEntry> tmps;
     currentDirRomCount = 0;
 
     if (startDir != NULL && startDir[0] != 0) {
@@ -349,13 +352,13 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::
             continue;
         if (dir->d_type == DT_DIR)
         {
-            files.emplace_back(std::string(dir->d_name), FileEntryType::ChildDirectory);
+            dirs.emplace_back(std::string(dir->d_name), FileEntryType::ChildDirectory);
         }
         if (dir->d_type == DT_REG)
         {
             if (file3dsIsValidFilename(dir->d_name, extensions))
             {
-                files.emplace_back(std::string(dir->d_name), FileEntryType::File);
+                tmps.emplace_back(std::string(dir->d_name), FileEntryType::File);
                 currentDirRomCount++;
             }
         }
@@ -363,15 +366,34 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::
 
     closedir(d);
 
+    std::sort(dirs.begin(), dirs.end(), [&](const DirectoryEntry& a, const DirectoryEntry& b) {
+        std::string mappedA = mapGBKToInitial(a.Filename);
+        std::string mappedB = mapGBKToInitial(b.Filename);
+        return mappedA.compare(mappedB) < 0;
+    });
+
+    std::sort(tmps.begin(), tmps.end(), [&](const DirectoryEntry& a, const DirectoryEntry& b) {
+        std::string mappedA = mapGBKToInitial(a.Filename);
+        std::string mappedB = mapGBKToInitial(b.Filename);
+        return mappedA.compare(mappedB) < 0;
+    });
+
+    files.insert(files.end(), dirs.begin(), dirs.end());
+    files.insert(files.end(), tmps.begin(), tmps.end());
+    dirs.clear();
+    tmps.clear();
+
+/*
     std::sort(files.begin(), files.end(), [](const DirectoryEntry& a, const DirectoryEntry& b) {
         // lowercase sorting of filenames (e.g. "NHL 96" comes after "New Horizons")
         std::string filenameA = a.Filename;
         std::transform(filenameA.begin(), filenameA.end(), filenameA.begin(), ::tolower);
         std::string filenameB = b.Filename;
-         std::transform(filenameB.begin(), filenameB.end(), filenameB.begin(), ::tolower);
+        std::transform(filenameB.begin(), filenameB.end(), filenameB.begin(), ::tolower);
 
         return std::tie(a.Type, filenameA) < std::tie(b.Type, filenameB);
     });
+*/
 
     return true;
 }
