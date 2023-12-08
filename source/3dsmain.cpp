@@ -640,7 +640,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
     AddMenuHeader1(items, "外观设定"s);
 
     std::vector<std::string>thumbnailOptions = {"无", "封面图", "标题画面图", "游戏截图"};
-    std::string gameThumbnailMessage = "选择在\"加载游戏\"选项中显示的缩略图。";
+    std::string gameThumbnailMessage = "选择在\"加载游戏\"选项中显示的缩略图.";
     bool thumbnailsAvailable = false;
 
     for (const std::string& option : thumbnailOptions) {
@@ -654,10 +654,10 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
 
     // display info message when user doesn't have provided any game thumbnails yet
     if (!thumbnailsAvailable) {
-        gameThumbnailMessage += "\n找不到缩略图，你可以在下列网站中下载缩略图。\ngithub.com/matbo87/snes9x_3ds-assets";
+        gameThumbnailMessage += "\n找不到缩略图，你可以在下列网站中下载缩略图.\ngithub.com/matbo87/snes9x_3ds-assets";
     }
 
-    AddMenuPicker(items, "  游戏缩略图"s, "选择在\"加载游戏\"选项中显示的缩略图。"s, makeOptionsForGameThumbnail(thumbnailOptions), settings3DS.GameThumbnailType, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  游戏缩略图"s, "选择在\"加载游戏\"选项中显示的缩略图."s, makeOptionsForGameThumbnail(thumbnailOptions), settings3DS.GameThumbnailType, DIALOG_TYPE_INFO, true,
         [&menuTab, &currentMenuTab]( int val ) { 
             if (!CheckAndUpdate(settings3DS.GameThumbnailType, val)) {
                 return;
@@ -681,14 +681,14 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         themeNames.emplace_back(std::string(Themes[i].Name));
     }
 
-    AddMenuPicker(items, "  主题"s, "选择应用于界面的主题。"s, makePickerOptions(themeNames), settings3DS.Theme, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  主题"s, "选择应用于界面的主题."s, makePickerOptions(themeNames), settings3DS.Theme, DIALOG_TYPE_INFO, true,
         []( int val ) { CheckAndUpdate(settings3DS.Theme, val); });
 
 
-    AddMenuPicker(items, "  字体"s, "选择应用于界面的字体。"s, makePickerOptions({"Tempesta", "Ronda", "Arial"}), settings3DS.Font, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  字体"s, "选择应用于界面的字体."s, makePickerOptions({"Tempesta", "Ronda", "Arial"}), settings3DS.Font, DIALOG_TYPE_INFO, true,
         []( int val ) { if ( CheckAndUpdate( settings3DS.Font, val ) ) { ui3dsSetFont(val); } });
 
-    AddMenuPicker(items, "  显示屏幕"s, "选择使用上屏或下屏进行游玩。"s, makePickerOptions({"上屏幕", "下屏幕"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  显示屏幕"s, "选择使用上屏或下屏进行游玩."s, makePickerOptions({"上屏幕", "下屏幕"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
         [isPauseMenu, &closeMenu]( int val ) { 
             gfxScreen_t screen = (val == 0) ? GFX_TOP : GFX_BOTTOM;
         
@@ -723,8 +723,8 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
     if (cfgFileAvailable > 0) {
         items.emplace_back([&menuTab, &currentMenuTab, &closeMenu](int val) {
             std::ostringstream resetConfigDescription;
-            std::string gameConfigDescription = " 并/或移除当前游戏配置。";
-            resetConfigDescription << "将初始化为默认设定" << (cfgFileAvailable == 3 ? gameConfigDescription : "") << "。初始化完成后将退出模拟器，重启模拟器以应用设置。";
+            std::string gameConfigDescription = " 并/或移除当前游戏配置.";
+            resetConfigDescription << "将初始化为默认设定" << (cfgFileAvailable == 3 ? gameConfigDescription : "") << ".初始化完成后将退出模拟器，重启模拟器以应用设置.";
 
             SMenuTab dialogTab;
             bool isDialog = false;
@@ -741,16 +741,16 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
             
             switch (result) {
                 case 1:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定。如果问题仍然存在，请尝试在SD卡内手动删除配置文件。现在将退出模拟器。", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 case 2:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除游戏设定。如果问题仍然存在，请尝试在SD卡内手动删除配置文件。现在将退出模拟器。", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除游戏设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 case 3:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定和游戏设定。如果问题仍然存在，请尝试在SD卡内手动删除配置文件。现在将退出模拟器。", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "错误", "无法移除全局设定和游戏设定.如果问题仍然存在，请尝试在SD卡内手动删除配置文件.现在将退出模拟器.", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                     break;
                 default:
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "成功",  "已初始化设定。现在将退出模拟器", Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "成功",  "已初始化设定.现在将退出模拟器", Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
                     break;
             }
 
@@ -855,7 +855,7 @@ std::vector<SMenuItem> makeOptionsForFrameRate() {
 
 std::vector<SMenuItem> makeOptionsForAutoSaveSRAMDelay() {
     std::vector<SMenuItem> items;
-    AddMenuDialogOption(items, 1, "1秒"s,    "可能会带来一些音效问题和跳帧。"s);
+    AddMenuDialogOption(items, 1, "1秒"s,    "可能会带来一些音效问题和跳帧."s);
     AddMenuDialogOption(items, 2, "10秒"s,  ""s);
     AddMenuDialogOption(items, 3, "60秒"s,  ""s);
     AddMenuDialogOption(items, 4, "关闭"s,    ""s);
@@ -882,7 +882,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设定"s);
     int secondScreenPickerId = 1000;
-    AddMenuPicker(items, "  副屏幕显示内容"s, "选择 \"游戏封面\" 请确认封面图片文件已配置好，否则将会显示默认图像。"s, 
+    AddMenuPicker(items, "  副屏幕显示内容"s, "选择 \"游戏封面\" 请确认封面图片文件已配置好，否则将会显示默认图像."s, 
         makePickerOptions({"无", "游戏封面", "ROM信息"}), settings3DS.SecondScreenContent, DIALOG_TYPE_INFO, true,
                     [secondScreenPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.SecondScreenContent, val)) {
@@ -897,7 +897,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
 
 
     int gameBorderPickerId = 1500;
-    AddMenuPicker(items, "  边框"s, "选择 \"游戏指定\" 请确认边框图片文件已配置好，否则将显示黑色边框。"s, 
+    AddMenuPicker(items, "  边框"s, "选择 \"游戏指定\" 请确认边框图片文件已配置好，否则将显示黑色边框."s, 
         makePickerOptions({"无", "默认", "游戏指定"}), settings3DS.GameBorder, DIALOG_TYPE_INFO, true,
                     [gameBorderPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.GameBorder, val)) {
