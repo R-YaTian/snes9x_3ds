@@ -106,7 +106,7 @@ size_t cacheThumbnails(std::vector<DirectoryEntry>& romFileNames, unsigned short
         for (int j = start; j < end; j++) {
             
             if (romFileNames[j].Type == FileEntryType::File) {
-                std::string thumbnailFilename = file3dsGetAssociatedFilename(romFileNames[j].Filename.c_str(), ".png", "缩略图", true);
+                std::string thumbnailFilename = file3dsGetAssociatedFilename(romFileNames[j].Filename.c_str(), ".png", "thumbnails", true);
 
                 if (!thumbnailFilename.empty()) {
                     file3dsAddFileBufferToMemory(romFileNames[j].Filename, thumbnailFilename);
@@ -229,7 +229,7 @@ void initThumbnailThread() {
     if (settings3DS.lastSelectedFilename[0] != 0) {
         char lastSelectedGame[_MAX_PATH];
         strncpy(lastSelectedGame, settings3DS.lastSelectedFilename, _MAX_PATH);
-        std::string thumbnailFilename = file3dsGetAssociatedFilename(lastSelectedGame, ".png", "缩略图", true);
+        std::string thumbnailFilename = file3dsGetAssociatedFilename(lastSelectedGame, ".png", "thumbnails", true);
         
         if (!thumbnailFilename.empty()) {
             file3dsAddFileBufferToMemory(lastSelectedGame, thumbnailFilename);
@@ -516,7 +516,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         items.emplace_back([&menuTab, &currentMenuTab, &closeMenu](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "重启主机", "将会重启游戏,确定吗?");
+            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "重启控制台", "将会重启游戏,确定吗?");
 
             if (confirmed) {
                 impl3dsResetConsole();
@@ -527,7 +527,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         items.emplace_back([&menuTab, &currentMenuTab](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", "正在保存截图...", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截屏", "正在保存截屏...", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
 
             const char *path;
             bool success = impl3dsTakeScreenshot(path, true);
@@ -535,15 +535,15 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
             if (success)
             {
                 char text[600];
-                snprintf(text, 600, "截图已保存到%s", path);
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", text, Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                snprintf(text, 600, "截屏已保存到%s", path);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截屏", text, Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
             }
             else
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截图", "保存截图失败!", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "截屏", "保存截屏失败!", Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                         
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
 
-        }, MenuItemType::Action, "  截图"s, ""s);
+        }, MenuItemType::Action, "  截屏"s, ""s);
 
         AddMenuHeader2(items, ""s);
 
@@ -640,7 +640,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
 
     AddMenuHeader1(items, "外观设定"s);
 
-    std::vector<std::string>thumbnailOptions = {"无", "封面图", "标题画面图", "游戏截图"};
+    std::vector<std::string>thumbnailOptions = {"无", "封面图", "标题画面图", "游戏截屏"};
     std::string gameThumbnailMessage = "选择在\"加载游戏\"选项中显示的缩略图.";
     bool thumbnailsAvailable = false;
 
