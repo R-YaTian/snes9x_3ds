@@ -549,7 +549,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
 
         int groupId = 500; // necessary for radio group
 
-        AddMenuHeader2(items, "保存并读取"s);
+        AddMenuHeader2(items, "保存与读取"s);
         AddMenuHeader2(items, ""s);
 
         for (int slot = 1; slot <= SAVESLOTS_MAX; ++slot) {
@@ -571,7 +571,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     if (stateUsed) {
                         std::ostringstream confirmMessage;
                         confirmMessage << "确定要覆盖存档位 #" << slot << "吗?";
-                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", confirmMessage.str(), false);
+                        bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTab, "即时存档", confirmMessage.str(), false);
 
                         if (!confirmed) {
                             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
@@ -582,18 +582,18 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                     
                     std::ostringstream oss;
                     oss << "正在保存到存档位 #" << slot;
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "即时存档", oss.str(), Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>(), -1, !stateUsed);
                     result = impl3dsSaveStateSlot(slot);
 
                     if (!result) {
                         oss << " 失败.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "即时存档", oss.str(), Themes[settings3DS.Theme].dialogColorWarn, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                     }
                     else
                     {
                         oss << " 完成.";
-                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "存档位", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
+                        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "即时存档", oss.str(), Themes[settings3DS.Theme].dialogColorSuccess, makeOptionsForOk(), -1, false);
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
                         if (CheckAndUpdate( settings3DS.CurrentSaveSlot, slot )) {
                             for (int i = 0; i < currentTab->MenuItems.size(); i++)
@@ -618,7 +618,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
             std::ostringstream optionText;
             int state = impl3dsGetSlotState(slot);
 
-            optionText << "  读取即时存档 #" << slot;
+            optionText << "  读取存档位 #" << slot;
             items.emplace_back([slot, &menuTab, &currentMenuTab, &closeMenu](int val) {
                 bool result = impl3dsLoadStateSlot(slot);
                 if (!result) {
@@ -883,7 +883,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设定"s);
     int secondScreenPickerId = 1000;
-    AddMenuPicker(items, "  副屏幕显示内容"s, "选择 \"游戏封面\" 请确认封面图片文件已配置好,否则将会显示默认图像."s, 
+    AddMenuPicker(items, "  副屏幕显示内容"s, "若选择 \"游戏封面\" 请确认封面图片文件已配置好,否则将会显示默认图像."s, 
         makePickerOptions({"无", "游戏封面", "ROM信息"}), settings3DS.SecondScreenContent, DIALOG_TYPE_INFO, true,
                     [secondScreenPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.SecondScreenContent, val)) {
