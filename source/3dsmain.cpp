@@ -957,7 +957,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuCheckbox(items, "  暂停时强制写入SRAM"s, settings3DS.ForceSRAMWriteOnPause,
                     []( int val ) { CheckAndUpdate( settings3DS.ForceSRAMWriteOnPause, val ); });
 
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于"Yoshi's Island"等部分游戏需要应用此项)"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于Yoshi's Island\n等部分游戏需要应用此项)"s, ""s);
 
     return items;
 };
