@@ -1409,12 +1409,12 @@ void menu3dsSetHotkeysData(char* hotkeysData[HOTKEYS_COUNT][3]) {
             case HOTKEY_QUICK_SAVE: 
                 hotkeysData[i][0]= "QuickSave"; 
                 hotkeysData[i][1]= "  快速保存即时存档"; 
-                hotkeysData[i][2]= "保存游戏进度到上次使用的存档位(默认为:  存档位 #1)";
+                hotkeysData[i][2]= "在上次使用的存档位保存游戏进度(默认为:  存档位 #1)";
                 break;
             case HOTKEY_QUICK_LOAD: 
                 hotkeysData[i][0]= "QuickLoad"; 
                 hotkeysData[i][1]= "  快速读取即时存档"; 
-                hotkeysData[i][2]= "读取游戏进度到上次使用的存档位(默认为:  存档位 #1)";
+                hotkeysData[i][2]= "从上次使用的存档位读取游戏进度(默认为:  存档位 #1)";
                 break;
             case HOTKEY_SAVE_SLOT_NEXT: 
                 hotkeysData[i][0]= "SaveSlotNext"; 
