@@ -36,10 +36,10 @@ u8* tempBufGameScreen = nullptr;
 std::unordered_map<std::string, int> selectedItemIndices;
 
 MenuButton bottomMenuButtons[] = {
-    {"Select", "\x0cc", 0x800d1d},
-    {"Back", "\x0cd", 0x999409},
-    {"Options", "\x0ce", 0x0d5280},
-    {"Page \x0d1", "\x0cf", 0x0d8014}
+    {"选择", "\x0cc", 0x800d1d},
+    {"返回", "\x0cd", 0x999409},
+    {"设置", "\x0ce", 0x0d5280},
+    {"页面 \x0d1", "\x0cf", 0x0d8014}
 };
 
 void menu3dsSetCurrentPercent(int current, int total) {
