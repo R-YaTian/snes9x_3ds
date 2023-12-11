@@ -682,11 +682,11 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         themeNames.emplace_back(std::string(Themes[i].Name));
     }
 
-    AddMenuPicker(items, "  主题"s, "选择用于用户界面的字体(仅适用于字母和数字)."s, makePickerOptions(themeNames), settings3DS.Theme, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  主题"s, "选择应用于界面的主题."s, makePickerOptions(themeNames), settings3DS.Theme, DIALOG_TYPE_INFO, true,
         []( int val ) { CheckAndUpdate(settings3DS.Theme, val); });
 
 
-    AddMenuPicker(items, "  字体"s, "选择应用于界面的字体."s, makePickerOptions({"Tempesta", "Ronda", "Arial"}), settings3DS.Font, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  字体"s, "选择用于用户界面的字体(仅适用于字母和数字)."s, makePickerOptions({"Tempesta", "Ronda", "Arial"}), settings3DS.Font, DIALOG_TYPE_INFO, true,
         []( int val ) { if ( CheckAndUpdate( settings3DS.Font, val ) ) { ui3dsSetFont(val); } });
 
     AddMenuPicker(items, "  显示屏幕"s, "选择使用上屏或下屏进行游玩."s, makePickerOptions({"上屏幕", "下屏幕"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
@@ -979,7 +979,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
     AddMenuHeader1(items, "模拟器功能"s);
 
 
-    AddMenuCheckbox(items, "  为所有游戏应用连发设定"s, settings3DS.UseGlobalEmuControlKeys,
+    AddMenuCheckbox(items, "  为所有游戏应用热键设定"s, settings3DS.UseGlobalEmuControlKeys,
                 []( int val ) 
                 { 
                     CheckAndUpdate( settings3DS.UseGlobalEmuControlKeys, val ); 
@@ -1031,7 +1031,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
                     }
 
                 });
-    AddMenuCheckbox(items, "  为所有游戏应用热键设定"s, settings3DS.UseGlobalTurbo,
+    AddMenuCheckbox(items, "  为所有游戏应用连发设定"s, settings3DS.UseGlobalTurbo,
                 []( int val ) 
                 { 
                     CheckAndUpdate( settings3DS.UseGlobalTurbo, val ); 
@@ -1048,7 +1048,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
     
     AddMenuHeader2(items, "");
     AddMenuHeader2(items, "滑控钮映射"s);
-    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "不绑定时可以将滑控钮用于按键映射."s, 
+    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项.不绑定时可以将滑控钮用于按键映射."s, 
                 makePickerOptions({"关闭", "开启"}), settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, DIALOG_TYPE_INFO, true,
                   [hotkeyPickerGroupId, &closeMenu, &menuTab, &currentMenuTab]( int val ) { 
                     if (CheckAndUpdate(settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, val)) {
@@ -1974,7 +1974,7 @@ void menuSetupCheats(std::vector<SMenuItem>& cheatMenu)
         snprintf(message, _MAX_PATH - 1,
             "\n未发现此游戏的金手指. 要启用金手指,请将\n"
             "\"%s.chx\" (或是 *.cht) 复制到SD卡的 \"%s\" 文件夹.\n"
-            "\n\n支持 Game-Genie 和 Pro Action Replay代码.\n"
+            "\n\n支持 Game-Genie 和 Pro Action Replay 代码.\n"
             "*.chx 的格式是 [Y/N],[CheatCode],[Name].\n"
             "详情请查看 %s \n"
             "\n\n金手指整合 (已粗略测试): %s",
