@@ -555,7 +555,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
         for (int slot = 1; slot <= SAVESLOTS_MAX; ++slot) {
             std::ostringstream optionText;
             int state = impl3dsGetSlotState(slot);
-            optionText << "  Save Slot #" << slot;
+            optionText << "  保存存档位 #" << slot;
 
             AddMenuRadio(items, optionText.str(), state, groupId, groupId + slot,
                 [slot, state, groupId, &menuTab, &currentMenuTab](int val) {
@@ -883,7 +883,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设定"s);
     int secondScreenPickerId = 1000;
-    AddMenuPicker(items, "  副屏幕显示内容"s, "若选择 \"游戏封面\" 请确认封面图片文件已配置好,否则将会显示默认图像."s, 
+    AddMenuPicker(items, "  副屏幕显示内容"s, "若选择 \"游戏封面\" 请确认封面图已配置好,否则将显示默认图像."s, 
         makePickerOptions({"无", "游戏封面", "ROM信息"}), settings3DS.SecondScreenContent, DIALOG_TYPE_INFO, true,
                     [secondScreenPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.SecondScreenContent, val)) {
@@ -898,7 +898,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
 
 
     int gameBorderPickerId = 1500;
-    AddMenuPicker(items, "  边框"s, "若选择 \"游戏指定\" 请确认边框图片文件已配置好,否则将显示黑色边框."s, 
+    AddMenuPicker(items, "  边框"s, "若选择 \"游戏指定\" 请确认边框图已配置好,否则将显示黑色边框."s, 
         makePickerOptions({"无", "默认", "游戏指定"}), settings3DS.GameBorder, DIALOG_TYPE_INFO, true,
                     [gameBorderPickerId, &menuTab, &currentMenuTab]( int val ) { 
                         if (CheckAndUpdate(settings3DS.GameBorder, val)) {
@@ -950,14 +950,14 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
 
     AddMenuCheckbox(items, "  退出时自动保存即时存档并在启动时自动加载"s, settings3DS.AutoSavestate,
         []( int val ) { CheckAndUpdate( settings3DS.AutoSavestate, val ); });
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (将在 \"savestates\" 文件夹创建一个*.auto.frz文件.)"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (将在\"savestates\"文件夹创建一个*.auto.frz文件.)"s, ""s);
 
-    AddMenuPicker(items, "  SRAM自动保存延时"s, "当游戏太频繁写入SRAM到SD卡时,尝试60秒延时或者禁用自动保存."s, makeOptionsForAutoSaveSRAMDelay(), settings3DS.SRAMSaveInterval, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  SRAM自动保存延时"s, "当游戏太频繁写入SRAM到SD卡时, 尝试60秒延时或禁用自动保存."s, makeOptionsForAutoSaveSRAMDelay(), settings3DS.SRAMSaveInterval, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.SRAMSaveInterval, val ); });
     AddMenuCheckbox(items, "  暂停时强制写入SRAM"s, settings3DS.ForceSRAMWriteOnPause,
                     []( int val ) { CheckAndUpdate( settings3DS.ForceSRAMWriteOnPause, val ); });
 
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于 Yoshi's Island 等部分游戏需要应用此项)"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于"Yoshi's Island"等部分游戏需要应用此项)"s, ""s);
 
     return items;
 };
@@ -1048,7 +1048,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
     
     AddMenuHeader2(items, "");
     AddMenuHeader2(items, "滑控钮映射"s);
-    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项.不绑定时可以将滑控钮用于按键映射."s, 
+    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项.\n不绑定时可以将滑控钮用于按键映射."s, 
                 makePickerOptions({"关闭", "开启"}), settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, DIALOG_TYPE_INFO, true,
                   [hotkeyPickerGroupId, &closeMenu, &menuTab, &currentMenuTab]( int val ) { 
                     if (CheckAndUpdate(settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, val)) {

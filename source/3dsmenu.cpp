@@ -1388,47 +1388,47 @@ void menu3dsSetHotkeysData(char* hotkeysData[HOTKEYS_COUNT][3]) {
         switch(i) {
             case HOTKEY_OPEN_MENU: 
                 hotkeysData[i][0]= "OpenEmulatorMenu";
-                hotkeysData[i][1]= "  Open Emulator Menu"; 
+                hotkeysData[i][1]= "  打开模拟器菜单"; 
                 hotkeysData[i][2]= "";
                 break;
             case HOTKEY_DISABLE_FRAMELIMIT: 
                 hotkeysData[i][0]= "DisableFramelimitHold"; 
-                hotkeysData[i][1]= "  Fast-Forward"; 
-                hotkeysData[i][2]= "May corrupt/freeze games on Old 3DS";
+                hotkeysData[i][1]= "  加速"; 
+                hotkeysData[i][2]= "在旧款3DS上可能会出现错误或卡死.";
                 break;
             case HOTKEY_SWAP_CONTROLLERS: 
                 hotkeysData[i][0]= "SwapControllers"; 
-                hotkeysData[i][1]= "  Swap Controllers"; 
-                hotkeysData[i][2]= "Allows you to control Player 2 (e.g. for using Konami Cheat)";
+                hotkeysData[i][1]= "  切换控制器"; 
+                hotkeysData[i][2]= "允许使用2P控制器(可用于输入KONAMI秘籍).";
                 break;
             case HOTKEY_SCREENSHOT: 
                 hotkeysData[i][0]= "TakeScreenshot"; 
-                hotkeysData[i][1]= "  Screenshot"; 
-                hotkeysData[i][2]= "Takes a Screenshot from the current game";
+                hotkeysData[i][1]= "  截屏"; 
+                hotkeysData[i][2]= "为当前游戏截屏.";
                 break;
             case HOTKEY_QUICK_SAVE: 
                 hotkeysData[i][0]= "QuickSave"; 
-                hotkeysData[i][1]= "  Quick Save"; 
-                hotkeysData[i][2]= "Saves the Game to last used Save Slot (Default:  Slot #1)";
+                hotkeysData[i][1]= "  快速保存即时存档"; 
+                hotkeysData[i][2]= "保存游戏进度到上次使用的存档位(默认为:  存档位 #1)";
                 break;
             case HOTKEY_QUICK_LOAD: 
                 hotkeysData[i][0]= "QuickLoad"; 
-                hotkeysData[i][1]= "  Quick Load"; 
-                hotkeysData[i][2]= "Loads the Game from last used Load Slot (Default: Slot #1)";
+                hotkeysData[i][1]= "  快速读取即时存档"; 
+                hotkeysData[i][2]= "读取游戏进度到上次使用的存档位(默认为:  存档位 #1)";
                 break;
             case HOTKEY_SAVE_SLOT_NEXT: 
                 hotkeysData[i][0]= "SaveSlotNext"; 
-                hotkeysData[i][1]= "  Save Slot +"; 
-                hotkeysData[i][2]= "Selects next Save Slot";
+                hotkeysData[i][1]= "  向后切换存档位"; 
+                hotkeysData[i][2]= "选择下一个存档位";
                 break;
             case HOTKEY_SAVE_SLOT_PREV: 
                 hotkeysData[i][0]= "SaveSlotPrev"; 
-                hotkeysData[i][1]= "  Save Slot -"; 
-                hotkeysData[i][2]= "Selects previous Save Slot";
+                hotkeysData[i][1]= "  向前切换存档位"; 
+                hotkeysData[i][2]= "选择上一个存档位";
                 break;
             default: 
                 hotkeysData[i][0]= ""; 
-                hotkeysData[i][1]= "  <empty>"; 
+                hotkeysData[i][1]= "  <空>"; 
                 hotkeysData[i][2]= ""; 
         }
     }
