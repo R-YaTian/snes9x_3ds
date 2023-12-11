@@ -957,7 +957,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuCheckbox(items, "  暂停时强制写入SRAM"s, settings3DS.ForceSRAMWriteOnPause,
                     []( int val ) { CheckAndUpdate( settings3DS.ForceSRAMWriteOnPause, val ); });
 
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于\"Yoshi's Island\"等部分游戏需要应用此项)"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (类似于 耀西岛 等部分游戏需要应用此项)"s, ""s);
 
     return items;
 };
@@ -1048,7 +1048,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
     
     AddMenuHeader2(items, "");
     AddMenuHeader2(items, "滑控钮映射"s);
-    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项. 不绑定时可以将滑控钮用于按键映射."s, 
+    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项, 不绑定时可以将滑控钮用于按键映射."s, 
                 makePickerOptions({"关闭", "开启"}), settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, DIALOG_TYPE_INFO, true,
                   [hotkeyPickerGroupId, &closeMenu, &menuTab, &currentMenuTab]( int val ) { 
                     if (CheckAndUpdate(settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, val)) {
