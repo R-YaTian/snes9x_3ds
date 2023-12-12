@@ -52,9 +52,9 @@ const char *getAppVersion(const char *prefix) {
     static char version[maxLength];
 
     if (VERSION_MICRO > 0) {
-        snprintf(version, maxLength - 1, "%s%d.%d.%d", prefix, VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
+        snprintf(version, maxLength - 1, "%s%d.%d.%dc", prefix, VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO);
     } else {
-        snprintf(version, maxLength - 1, "%s%d.%d", prefix, VERSION_MAJOR, VERSION_MINOR);
+        snprintf(version, maxLength - 1, "%s%d.%dc", prefix, VERSION_MAJOR, VERSION_MINOR);
     }
 
     return version;

@@ -1,5 +1,17 @@
 # Snes9x for 3DS
 
+## Chinese Simplified Version
+
+### Credits
+- [bubble2k16](https://github.com/bubble2k16), [ramzinouri](https://github.com/ramzinouri/snes9x_3ds), [Asdolo](https://github.com/Asdolo/snes9x_3ds_forwarder) and [matbo87](https://github.com/matbo87): Original English version
+- [xxxxst](https://github.com/xxxxst): Simple Chinese language directory support and GBK font table
+- [R-YaTian](https://github.com/R-YaTian): Continue work on Chinese language support and Implement Chinese Pinyin sorting for files
+
+### Translators
+- [James-Makoto](https://github.com/James-Makoto)
+- [R-YaTian](https://github.com/R-YaTian)
+- [xxxxst](https://github.com/xxxxst)
+
 ## Purpose:
 
 This fork adds several features to bubble2k's great implementation, giving you more options to enjoy your game collection. It's built with recent versions of devkitARM (r62) and libctru (2.2.2). See [Building from source](#building-from-source) for more info. Feedback and bug reports are welcome. Help with development is also welcome. 
@@ -16,14 +28,16 @@ This fork adds several features to bubble2k's great implementation, giving you m
 
 ## Setup:
 
-* Download latest cia version [here](https://github.com/matbo87/snes9x_3ds/releases) and install via [FBI](https://github.com/Steveice10/FBI/releases).
+* Download latest cia version [here](https://github.com/R-YaTian/snes9x_3ds/releases) and install via [FBI](https://github.com/Steveice10/FBI/releases).
+* Copy gbk.bin into the /emus3ds folder on your SD card.
 * (Optional) Download latest no-intro sets [here](https://github.com/matbo87/snes9x_3ds-assets/releases).
 
 You can put your SNES games inside any folder. Keep in mind that zip files are not supported. Your game has to be in ".smc", ".sfc" or ".fig" format.<br>
 Configs, saves and other assets are located at **sd:/3ds/snes9x3ds**
 
 ### 3dsx Version:
-* Copy snes9x_3ds.3dsx and snes9x_3ds.sdmh to **sd:/3ds/snes9x_3ds**
+* Copy snes9x_3ds.3dsx to **sd:/3ds/snes9x_3ds**
+* Copy gbk.bin into the /emus3ds folder on your SD card.
 * Go to your Homebrew Launcher and launch the snes9x_3ds emulator
 
 
@@ -35,6 +49,7 @@ See https://github.com/matbo87/snes9x_3ds-assets.
 * Make sure you have devkitPro and ctrulib installed correctly. 
 If not, https://devkitpro.org/wiki/devkitPro_pacman will guide you through this process.
 * Makefile is based on TricksterGuy's [3ds-template](https://github.com/TricksterGuy/3ds-template). 
+* (Optional) Run `export RELEASE=1` if want to build release target
 * Run `make 3dslink` to send the 3dsx build to your homebrew launcher.
 
 You can use citra as well, but game emulation is broken (no sound + snes tiles are not rendered properly). This issue is several years old - probably since libctru 1.5.x.
@@ -121,10 +136,3 @@ You can try using save states from Snes9x v1.43, but sometimes this emulator doe
 * Poor performance in some SFX1/2 games like Doom
 * Mosaics.
 * In-frame palette changes - This is because this emulator uses the 3DS GPU for all graphic rendering. Without in-frame palette changes implemented, a small number of games experience colour issues.
-
-
-## Credits
-
-* bubble2k for his [snes9x_3ds emulator](https://github.com/bubble2k16/snes9x_3ds)
-* ramzinouri for his [snes9x_3ds fork](https://github.com/ramzinouri/snes9x_3ds)
-* Asdolo for his [snes9x_3ds forwarder](https://github.com/Asdolo/snes9x_3ds_forwarder)

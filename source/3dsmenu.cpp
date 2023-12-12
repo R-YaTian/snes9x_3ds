@@ -143,7 +143,7 @@ void menu3dsDrawBlackScreen(float opacity)
     ui3dsDrawRect(0, 0, screenSettings.SecondScreenWidth, SCREEN_HEIGHT, 0x000000, opacity);    
 }
 
-void menu3dsDrawPauseScreen() 
+void menu3dsDrawPauseScreen()
 {
     u8* fb = (u8*)gfxGetFramebuffer(screenSettings.GameScreen, GFX_LEFT, NULL, NULL);
     int x0 = 0;
@@ -178,7 +178,7 @@ void menu3dsDrawPauseScreen()
             tempbuf_old[di + 1] = tempBufGameScreen[si + 2];
             tempbuf_old[di + 2] = tempBufGameScreen[si + 1];
         }
-        
+
     // note: both old and new buffer are modified
     fast_gaussian_blur(tempbuf_old, tempbuf_new, width, height, 3, 5, 3, kKernelCrop);
 
@@ -204,7 +204,7 @@ void menu3dsDrawPauseScreen()
                 fb[si + 3] = tempbuf_new[di];
             }
         }
-    
+
     linearFree(tempbuf_old);
     linearFree(tempbuf_new);
 
@@ -213,9 +213,9 @@ void menu3dsDrawPauseScreen()
     int textCy = SCREEN_HEIGHT / 2 - 8;
     int shadowColor = 0x111111;
 
-    ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx + 1, textCy + 1, textCx + textWidth + 1, textCy + 7 + 1, shadowColor, HALIGN_LEFT, 
+    ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx + 1, textCy + 1, textCx + textWidth + 1, textCy + 7 + 1, shadowColor, HALIGN_LEFT,
         "\x13\x14\x15\x16\x16 \x0e\x0f\x10\x11\x12 \x17\x18 \x14\x15\x16\x19\x1a\x15");
-    ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx, textCy, textCx + textWidth, textCy + 7, 0xffffff, HALIGN_LEFT, 
+    ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx, textCy, textCx + textWidth, textCy + 7, 0xffffff, HALIGN_LEFT,
         "\x13\x14\x15\x16\x16 \x0e\x0f\x10\x11\x12 \x17\x18 \x14\x15\x16\x19\x1a\x15");
 
     gfxScreenSwapBuffers(screenSettings.GameScreen, false);
@@ -505,7 +505,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
         // horizontal
         ui3dsDrawCheckerboard(cx0, cy0, cx1, cy0 + cwidth, cf1, cf2);
         ui3dsDrawCheckerboard(cx0, cy1 - cwidth, cx1, cy1, cf1, cf2);
-        
+
         // vertical
         ui3dsDrawCheckerboard(cx0, cy0 + cwidth, cx0 + cwidth, cy1 - cwidth, cf1, cf2);
         ui3dsDrawCheckerboard(cx1 - cwidth, cy0 + cwidth, cx1, cy1 - cwidth, cf1, cf2);
@@ -540,7 +540,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
         }
 
         // draw indicator when game has (active) cheats
-        if (menuTab[i].Title == "Cheats" && cheatsAll > 0) {
+        if (menuTab[i].Title == "金手指" && cheatsAll > 0) {
             int xOffset = screenSettings.SecondScreen == GFX_TOP ? 19 : 14;
             ui3dsDrawStringWithNoWrapping(screenSettings.SecondScreen, xRight - xOffset, yTextTop - 3, xRight, yCurrentTabBoxTop, cheatsActive > 0 ? accentColor : color, HALIGN_LEFT, "\x95");        
         }
@@ -579,9 +579,9 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
         battX2, 
         battY2, 
         Themes[settings3DS.Theme].menuBottomBarColor, 1.0f);
-        
+
     ptmuInit();
-    
+
     u8 batteryChargeState = 0;
     u8 batteryLevel = 0;
     if(R_SUCCEEDED(PTMU_GetBatteryChargeState(&batteryChargeState)) && batteryChargeState) {
@@ -598,9 +598,9 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
                 battX2-battLevelWidth*(i) - 1, battY2 - 1, Themes[settings3DS.Theme].accentColor, 1.0f);
         }
     }
- 
+
     ptmuExit();
-    
+
     bool romLoaded = menuTab.size() > 2;
     int buttonRightMargin = 5;
     int buttonLeftMargin = 10;
@@ -612,8 +612,8 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
             // multi color buttons for dark mode theme
             buttonColor = button.color;
         }
-        
-        if ((button.label != "Options" && button.label != "Page \x0d1") || currentTab->Title == "Load Game") {
+
+        if ((button.label != "设置" && button.label != "页面 \x0d1") || currentTab->Title == "加载游戏") {
             ui3dsDrawRect(bottomMenuPosX + 2, SCREEN_HEIGHT - 13, bottomMenuPosX + 9, SCREEN_HEIGHT - 5,0xffffff);
             bottomMenuPosX = ui3dsDrawStringWithNoWrapping(screenSettings.SecondScreen, bottomMenuPosX, SCREEN_HEIGHT - 16, bottomMenuPosX + 12, SCREEN_HEIGHT, buttonColor, HALIGN_LEFT,  button.icon) + buttonRightMargin;
             bottomMenuPosX = ui3dsDrawStringWithNoWrapping(screenSettings.SecondScreen, bottomMenuPosX, SCREEN_HEIGHT - 17, bottomMenuPosX + 100, SCREEN_HEIGHT, Themes[settings3DS.Theme].menuBottomBarTextColor, HALIGN_LEFT, button.label) + buttonLeftMargin;
@@ -648,7 +648,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTab, int& currentMenuTab, int me
 
         menu3dsSetLastSelectedIndexByTab(currentTab->Title, currentTab->SelectedItemIndex);
 
-        if (currentTab->Title != "Load Game") {
+        if (currentTab->Title != "加载游戏") {
             return;
         }
 
@@ -893,7 +893,7 @@ int menu3dsMenuSelectItem(SMenuTab& dialogTab, bool& isDialog, int& currentMenuT
         lastKeysHeld = hidKeysHeld();
     }
 
-    if (currentTab->Title == "Load Game") {
+    if (currentTab->Title == "加载游戏") {
         swapBuffer = true;
         menu3dsSetCurrentPercent(0, -1);
     }
@@ -963,7 +963,7 @@ int menu3dsMenuSelectItem(SMenuTab& dialogTab, bool& isDialog, int& currentMenuT
                     }
                 }
 
-                if (lastSelectedItemIndex == currentTab->SelectedItemIndex && currentTab->Title != "Emulator") {
+                if (lastSelectedItemIndex == currentTab->SelectedItemIndex && currentTab->Title != "模拟器") {
                     currentTab = menu3dsAnimateTab(dialogTab, isDialog, currentMenuTab, menuTab, -1);
                 } 
                 
@@ -972,7 +972,7 @@ int menu3dsMenuSelectItem(SMenuTab& dialogTab, bool& isDialog, int& currentMenuT
 
             break; 
         }
-        if (keysDown & KEY_X && currentTab->Title == "Load Game")
+        if (keysDown & KEY_X && currentTab->Title == "加载游戏")
         {
             returnResult = FILE_MENU_SHOW_OPTIONS;
             break;
@@ -1056,7 +1056,7 @@ int menu3dsMenuSelectItem(SMenuTab& dialogTab, bool& isDialog, int& currentMenuT
                 else
                     currentTab->MenuItems[currentTab->SelectedItemIndex].SetValue(0);
 
-                if (currentTab->Title == "Cheats") {
+                if (currentTab->Title == "金手指") {
                     menu3dsSetCheatsIndicator(currentTab->MenuItems);
                 }    
 
@@ -1176,7 +1176,7 @@ int menu3dsMenuSelectItem(SMenuTab& dialogTab, bool& isDialog, int& currentMenuT
             menu3dsDrawEverything(dialogTab, isDialog, currentMenuTab, menuTab);
         }
 
-        if (lastPercent < 100 && !isDialog && currentTab->Title == "Load Game") {    
+        if (lastPercent < 100 && !isDialog && currentTab->Title == "加载游戏") {
             menu3dsDrawThumbnailCacheStatus(dialogTab, isDialog, currentMenuTab, menuTab);
         }
 

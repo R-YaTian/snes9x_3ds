@@ -167,6 +167,10 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
+ifneq ($(RELEASE),)
+	CXXFLAGS += -DRELEASE
+endif
+
 #---------------------------------------------------------------------------------
 # First set of targets ensure the build/output directories are created and execute
 # in the context of the BUILD directory.

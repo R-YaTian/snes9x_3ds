@@ -265,6 +265,18 @@ void drawStartScreen() {
     }
 }
 
+
+//----------------------------------------------------------------------
+// Set black pause screen
+//----------------------------------------------------------------------
+void drawBlackPauseScreen() {
+    menu3dsClearPauseScreen();
+    gfxSetScreenFormat(screenSettings.GameScreen, GSP_RGBA8_OES);
+    clearScreen(screenSettings.GameScreen);
+    menu3dsDrawPauseScreen();
+    gspWaitForVBlank();
+}
+
 //----------------------------------------------------------------------
 // Set default buttons mapping
 //----------------------------------------------------------------------
@@ -405,12 +417,12 @@ std::vector<SMenuItem> makePickerOptions(const std::vector<std::string>& options
 
 std::vector<SMenuItem> makeOptionsForResetConfig() {
     std::vector<SMenuItem> items;
-    AddMenuDialogOption(items, 0, "None"s, ""s);
+    AddMenuDialogOption(items, 0, "无"s, ""s);
 
     if (cfgFileAvailable == 1 || cfgFileAvailable == 3) {
-        AddMenuDialogOption(items, 1, "Global"s, "settings.cfg"s);
+        AddMenuDialogOption(items, 1, "全局设置"s, "settings.cfg"s);
     }
-     
+
     if (cfgFileAvailable > 1) {
         std::string gameConfigFilename =  file3dsGetFileBasename(Memory.ROMFilename, false);
 
@@ -419,18 +431,18 @@ std::vector<SMenuItem> makeOptionsForResetConfig() {
         }
 
         gameConfigFilename += ".cfg";
-        AddMenuDialogOption(items, 2, "Game"s, gameConfigFilename);
+        AddMenuDialogOption(items, 2, "游戏设置"s, gameConfigFilename);
     }
 
     if (cfgFileAvailable == 3) {
-        AddMenuDialogOption(items, 3, "Both"s, ""s);
+        AddMenuDialogOption(items, 3, "以上两者"s, ""s);
     }
-    
+
     return items;
 }
 
 std::vector<SMenuItem> makeOptionsForOk() {
-    return makePickerOptions({"OK"});
+    return makePickerOptions({"确定"});
 }
 
 std::vector<SMenuItem> makeOptionsForGameThumbnail(const std::vector<std::string>& options) {
@@ -494,7 +506,7 @@ std::vector<SMenuItem> makeOptionsForFileMenu(const std::vector<std::string>& op
 }
 
 bool confirmDialog(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, std::vector<SMenuTab>& menuTab, const std::string& title, const std::string& message, bool hideDialog = true) {
-    int result = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, title, message, Themes[settings3DS.Theme].dialogColorWarn, makePickerOptions({ "No", "Yes" }));
+    int result = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, title, message, Themes[settings3DS.Theme].dialogColorWarn, makePickerOptions({ "否", "是" }));
 
     if (hideDialog) {
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
@@ -706,7 +718,7 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
                 gfxSetDoubleBuffering(screenSettings.SecondScreen, true);
                 drawStartScreen();
             } else {
-                gfxSetScreenFormat(screenSettings.GameScreen, GSP_RGBA8_OES);
+                drawBlackPauseScreen();
             }
         });
 
@@ -724,8 +736,8 @@ std::vector<SMenuItem> makeEmulatorMenu(std::vector<SMenuTab>& menuTab, int& cur
     if (cfgFileAvailable > 0) {
         items.emplace_back([&menuTab, &currentMenuTab, &closeMenu](int val) {
             std::ostringstream resetConfigDescription;
-            std::string gameConfigDescription = " 并/或移除当前游戏配置.";
-            resetConfigDescription << "将初始化为默认设置" << (cfgFileAvailable == 3 ? gameConfigDescription : "") << ".初始化完成后将退出模拟器,重启模拟器以应用设置.";
+            std::string gameConfigDescription = "并/或移除当前游戏配置 ";
+            resetConfigDescription << "将初始化为默认设置," << (cfgFileAvailable == 3 ? gameConfigDescription : "") << "初始化完成后将退出模拟器\n重启模拟器以应用设置";
 
             SMenuTab dialogTab;
             bool isDialog = false;
@@ -915,12 +927,12 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
 
     AddMenuHeader1(items, "游戏设置"s);
     AddMenuHeader2(items, "视频"s);
-    AddMenuPicker(items, "  跳帧"s, "跳帧可以加快游戏速度,但可能会导致画面不平滑."s, 
+    AddMenuPicker(items, "  跳帧"s, "跳帧可以加快游戏速度,但可能会导致画面不平滑"s,
         makePickerOptions({"关闭", "开启 (最高1帧)", "开启 (最高2帧)", "开启 (最高3帧)", "开启 (最高4帧)"}), settings3DS.MaxFrameSkips, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.MaxFrameSkips, val ); });
     AddMenuPicker(items, "  帧率"s, "某些游戏默认运行于 50 或 60 FPS. 可在需要时覆盖帧率设置."s, makeOptionsForFrameRate(), static_cast<int>(settings3DS.ForceFrameRate), DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.ForceFrameRate, static_cast<EmulatedFramerate>(val) ); });
-    AddMenuPicker(items, "  调色盘"s, "可尝试设置此项以调整颜色."s, makeOptionsForInFramePaletteChanges(), settings3DS.PaletteFix, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  调色板"s, "可尝试设置此项以调整颜色."s, makeOptionsForInFramePaletteChanges(), settings3DS.PaletteFix, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.PaletteFix, val ); });
     
     AddMenuDisabledOption(items, ""s);
@@ -1048,7 +1060,7 @@ std::vector<SMenuItem> makeControlsMenu(std::vector<SMenuTab>& menuTab, int& cur
     
     AddMenuHeader2(items, "");
     AddMenuHeader2(items, "滑控钮映射"s);
-    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果你只用十字键进行游戏可能需要关闭此项, 不绑定时可以将滑控钮用于按键映射."s, 
+    AddMenuPicker(items, "  滑控钮绑定到十字键"s, "如果只用十字键进行游戏可能需要关闭此项, 不绑定时可以将滑控钮用于按键映射."s,
                 makePickerOptions({"关闭", "开启"}), settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, DIALOG_TYPE_INFO, true,
                   [hotkeyPickerGroupId, &closeMenu, &menuTab, &currentMenuTab]( int val ) { 
                     if (CheckAndUpdate(settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, val)) {

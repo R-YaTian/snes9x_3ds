@@ -2,6 +2,17 @@
 Notable changes to this project will be documented in this file.
 
 
+## v1.51.1c
+
+### Features
+* **UI & File menu**: Fully Simplified Chinese support, big thx to [xxxxst](https://github.com/xxxxst)
+* **File menu**: Now will sort files by Chinese Pinyin
+
+### Bug Fixes
+* **UI & File menu**: Improve line breaks, bug fix for "\n" as line breaks
+* **Pause screen**: Show a black pause screen after screen swap
+
+
 ## v1.51.1
 
 ### Bug Fixes
