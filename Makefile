@@ -71,7 +71,7 @@ APP_ROMFS         := $(TOPDIR)/$(ROMFS)
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 COMMON      := -g -w -O3 -mword-relocations -fomit-frame-pointer -ffunction-sections -DVERSION_MAJOR=$(APP_VERSION_MAJOR) -DVERSION_MINOR=$(APP_VERSION_MINOR) -DVERSION_MICRO=$(APP_VERSION_MICRO) $(ARCH) $(INCLUDE) -DARM11 -D_3DS
 CFLAGS      := $(COMMON) -std=gnu99
-CXXFLAGS    := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++17
+CXXFLAGS    := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++23
 ASFLAGS     := $(ARCH)
 LDFLAGS     = -specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
 
