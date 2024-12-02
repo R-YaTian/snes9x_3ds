@@ -2222,12 +2222,10 @@ void emulatorLoop()
 
         gpu3dsStartNewFrame();
         
-        if(!settings3DS.Disable3DSlider)
-        {
+        if(screenSettings.GameScreen == GFX_TOP && !settings3DS.Disable3DSlider) {
             gfxSet3D(true);
             gpu3dsCheckSlider();
-        }
-        else
+        } else
             gfxSet3D(false);
 
         updateSecondScreenContent();

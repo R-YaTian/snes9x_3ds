@@ -455,6 +455,13 @@ bool gpu3dsInitialize()
         return false;
     }
 
+    GX_MemoryFill(
+        GPU3DS.frameBuffer, 0, &GPU3DS.frameBuffer[240*400],
+        GX_FILL_TRIGGER | GX_FILL_32BIT_DEPTH,
+        GPU3DS.frameDepthBuffer, 0, &GPU3DS.frameDepthBuffer[240*400],
+        GX_FILL_TRIGGER | GX_FILL_32BIT_DEPTH);
+    gspWaitForPSC0();
+
     // Initialize the sub screen for console output.
     //
     consoleInit(screenSettings.SecondScreen, NULL);
