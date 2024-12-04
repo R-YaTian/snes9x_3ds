@@ -143,7 +143,7 @@ void menu3dsDrawBlackScreen(float opacity)
     ui3dsDrawRect(0, 0, screenSettings.SecondScreenWidth, SCREEN_HEIGHT, 0x000000, opacity);    
 }
 
-void menu3dsDrawPauseScreen()
+void menu3dsDrawPauseScreen(bool doubleBuffering)
 {
     u8* fb = (u8*)gfxGetFramebuffer(screenSettings.GameScreen, GFX_LEFT, NULL, NULL);
     int x0 = 0;
@@ -182,7 +182,6 @@ void menu3dsDrawPauseScreen()
     // note: both old and new buffer are modified
     fast_gaussian_blur(tempbuf_old, tempbuf_new, width, height, 3, 5, 3, kKernelCrop);
 
-
     int bHeight = 50;
     int by0 = SCREEN_HEIGHT / 2 - bHeight / 2;
     int by1 = by0 + bHeight;
@@ -212,6 +211,16 @@ void menu3dsDrawPauseScreen()
     int textCx = screenSettings.GameScreenWidth / 2 - textWidth / 2;
     int textCy = SCREEN_HEIGHT / 2 - 8;
     int shadowColor = 0x111111;
+
+    if (doubleBuffering)
+    {
+        ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx + 1, textCy + 1, textCx + textWidth + 1, textCy + 7 + 1, shadowColor, HALIGN_LEFT,
+            "\x13\x14\x15\x16\x16 \x0e\x0f\x10\x11\x12 \x17\x18 \x14\x15\x16\x19\x1a\x15");
+        ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx, textCy, textCx + textWidth, textCy + 7, 0xffffff, HALIGN_LEFT,
+            "\x13\x14\x15\x16\x16 \x0e\x0f\x10\x11\x12 \x17\x18 \x14\x15\x16\x19\x1a\x15");
+        gfxScreenSwapBuffers(screenSettings.GameScreen, false);
+        gspWaitForVBlank();
+    }
 
     ui3dsDrawStringWithNoWrapping(screenSettings.GameScreen, textCx + 1, textCy + 1, textCx + textWidth + 1, textCy + 7 + 1, shadowColor, HALIGN_LEFT,
         "\x13\x14\x15\x16\x16 \x0e\x0f\x10\x11\x12 \x17\x18 \x14\x15\x16\x19\x1a\x15");

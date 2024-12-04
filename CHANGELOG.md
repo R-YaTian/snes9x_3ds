@@ -2,6 +2,15 @@
 Notable changes to this project will be documented in this file.
 
 
+## v1.51.2c
+
+### Bug Fixes
+* **Core**: Fix Mega Man X game
+* **Video**: Minor fix to 3D Mode and gpu
+* **Menu**: Now screen swap setting will saving correctly when game is running
+* **Pause screen**: The black pause screen after screen swap now support double buffer drawing
+
+
 ## v1.51.1c
 
 ### Features

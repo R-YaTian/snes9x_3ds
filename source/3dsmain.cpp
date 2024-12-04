@@ -270,10 +270,15 @@ void drawStartScreen() {
 // Set black pause screen
 //----------------------------------------------------------------------
 void drawBlackPauseScreen() {
-    menu3dsClearPauseScreen();
+    gfxSetDoubleBuffering(screenSettings.GameScreen, false);
     gfxSetScreenFormat(screenSettings.GameScreen, GSP_RGBA8_OES);
     clearScreen(screenSettings.GameScreen);
-    menu3dsDrawPauseScreen();
+
+    gfxSetDoubleBuffering(screenSettings.GameScreen, true);
+    clearScreen(screenSettings.GameScreen);
+
+    menu3dsClearPauseScreen();
+    menu3dsDrawPauseScreen(true);
     gspWaitForVBlank();
 }
 
@@ -1620,11 +1625,12 @@ void fillFileMenuFromFileNames(std::vector<SMenuItem>& fileMenu, const std::vect
 }
 
 // show saving process dialog, because writing to sd card tends to be slow on 3ds
-bool saveCurrentSettings(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, std::vector<SMenuTab>& menuTab, bool includeGameSettings, bool includeCheatSettings = false) {
+bool saveCurrentSettings(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, std::vector<SMenuTab>& menuTab, bool includeGameSettings, bool includeCheatSettings = false, bool screenSwapped = false) {
     double minWaitTimeInSeconds = 0.5;
     long startFrameTick = svcGetSystemTick();
 
-    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "已更改设置.", "正在保存到SD卡..", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
+    if (!screenSwapped)
+        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTab, "已更改设置.", "正在保存到SD卡..", Themes[settings3DS.Theme].dialogColorInfo, std::vector<SMenuItem>());
     bool settingsSaved = settingsSave(includeGameSettings);
 
     // save cheat settings if changed
@@ -1646,7 +1652,8 @@ bool saveCurrentSettings(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTa
         svcSleepThread(1000000ULL * ms);
     }
 
-    menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
+    if (!screenSwapped)
+        menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTab);
 
     // TODO: handle saving failed
 
@@ -1813,8 +1820,7 @@ void menuSelectFile(void)
     }
 
     // don't show saving dialog when following changes have been made
-    // - screen swapped, config reset, rom loaded
-    // TODO: clean up
+    // - config reset, rom loaded
     if (prevSettings3DS != settings3DS && cfgFileAvailable != -1 && !romLoaded) {
         saveCurrentSettings(dialogTab, isDialog, currentMenuTab, menuTab, false);
     }
@@ -1916,12 +1922,10 @@ void menuPause()
 
     bool cheatSettingsUpdated = menuCopyCheats(cheatMenu, true);
     bool settingsUpdated = settings3DS != prevSettings3DS || cheatSettingsUpdated;
-    bool screenSwapped = settings3DS.GameScreen != prevSettings3DS.GameScreen;
     // don't show saving dialog when following changes have been made
-    // - screen swapped, config reset, rom or save slot loaded
-    // TODO: clean up
-    if (settingsUpdated && cfgFileAvailable != -1 && !screenSwapped && !slotLoaded && !loadRomBeforeExit) {
-        saveCurrentSettings(dialogTab, isDialog, currentMenuTab, menuTab, true, cheatSettingsUpdated);
+    // - config reset, rom or save slot loaded
+    if (settingsUpdated && cfgFileAvailable != -1 && !slotLoaded && !loadRomBeforeExit) {
+        saveCurrentSettings(dialogTab, isDialog, currentMenuTab, menuTab, true, cheatSettingsUpdated, settings3DS.GameScreen != prevSettings3DS.GameScreen);
     }
 
     settingsUpdateAllSettings();
@@ -2036,7 +2040,7 @@ void emulatorInitialize()
     ui3dsSetFont(settings3DS.Font);
 
 	Result rc = romfsInit();
-    
+
 	if (rc) {
         settings3DS.RomFsLoaded = false;
 	} else {
