@@ -796,6 +796,7 @@ std::vector<SMenuItem> makeOptionsForStretch() {
     std::vector<SMenuItem> items;
 
     AddMenuDialogOption(items, 0, "不拉伸"s,              "完美点对点 (256x224)"s);
+    AddMenuDialogOption(items, 6, "8:7自适应"s,                 "仅224行时拉伸,240行时不拉伸"s);
     AddMenuDialogOption(items, 1, "电视风格"s,                "宽度拉伸至292px"s);
 
     if (screenSettings.GameScreen == GFX_TOP) {
@@ -803,13 +804,11 @@ std::vector<SMenuItem> makeOptionsForStretch() {
         AddMenuDialogOption(items, 3, "裁剪适配4:3"s,         "裁剪拉伸到320x240"s);
         AddMenuDialogOption(items, 4, "全屏幕"s,              "拉伸到400x240");
         AddMenuDialogOption(items, 5, "裁剪全屏幕"s,      "裁剪拉伸到400x240");
-    }
-
-    else {
+    } else {
         AddMenuDialogOption(items, (settings3DS.ScreenStretch == 2) ? 2 : 4, "全屏幕"s,                 "拉伸到320x240"s);
         AddMenuDialogOption(items, (settings3DS.ScreenStretch == 3) ? 3 : 5, "裁剪全屏幕"s,         "裁剪拉伸到320x240"s);
     }
-    
+
     return items;
 }
 
@@ -1170,8 +1169,14 @@ bool settingsUpdateAllSettings(bool updateGameSettings = true)
         settings3DS.StretchWidth = screenSettings.GameScreenWidth;
         settings3DS.StretchHeight = SCREEN_HEIGHT;
         settings3DS.CropPixels = 8;
+    }
+    else if (settings3DS.ScreenStretch == 6)    // Stretch h/w but keep 1:1 ratio
+    {
+        settings3DS.StretchWidth = 01010000;       
+        settings3DS.StretchHeight = 240;
+        settings3DS.CropPixels = 0;
     } else {
-         // No Stretch / Pixel Perfect
+        // No Stretch / Pixel Perfect
         settings3DS.StretchWidth = 256;
         settings3DS.StretchHeight = -1;    
         settings3DS.CropPixels = 0;
