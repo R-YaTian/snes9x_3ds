@@ -24,6 +24,12 @@ static char currentDir[_MAX_PATH] = "";
 static char currentThumbnailDir[_MAX_PATH] = "";
 static unsigned short currentDirRomCount = 0;
 
+static volatile bool romFileNamesUpdating = false;
+
+bool isRomFileNamesUpdating() {
+    return romFileNamesUpdating;
+}
+
 const char *getFilenameExtension(const char *filename) {
     const char *dot = strrchr(filename, '.');
     if(!dot || dot == filename) return "";
@@ -103,6 +109,7 @@ void file3dsCleanStores(bool exit)
     thumbnailDirectories.clear();
 
     if (exit) {
+        availableThumbnailTypes.clear();
         romNameMappings.clear();
     }
 }
@@ -318,6 +325,7 @@ StoredFile file3dsAddFileBufferToMemory(const std::string& id, const std::string
 //----------------------------------------------------------------------
 bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::string>& extensions, const char* startDir)
 {
+    romFileNamesUpdating = true;
     files.clear();
     std::vector<DirectoryEntry> dirs;
     std::vector<DirectoryEntry> tmps;
@@ -337,6 +345,8 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::
     struct dirent* dir;
     DIR* d = opendir(currentDir);
     if (d == nullptr) {
+        romFileNamesUpdating = false;
+
         return false;
     }
 
@@ -394,6 +404,8 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, const std::vector<std::
         return std::tie(a.Type, filenameA) < std::tie(b.Type, filenameB);
     });
 */
+
+    romFileNamesUpdating = false;
 
     return true;
 }
