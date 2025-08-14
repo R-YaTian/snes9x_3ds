@@ -499,7 +499,7 @@ bool gpu3dsInitialize()
 
     // Initialize all shaders to empty
     //
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 3; i++)
     {
         GPU3DS.shaders[i].dvlb = NULL;
     }
@@ -549,7 +549,7 @@ void gpu3dsFinalize()
     //
     // Initialize all shaders to empty
     //
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 3; i++)
     {
         if (GPU3DS.shaders[i].dvlb)
             DVLB_Free(GPU3DS.shaders[i].dvlb);
