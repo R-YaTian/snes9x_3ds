@@ -906,7 +906,7 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
                   []( int val ) { CheckAndUpdate( settings3DS.ScreenStretch, val ); });
     AddMenuCheckbox(items, "  线性过滤"s, settings3DS.ScreenFilter,
         []( int val ) { CheckAndUpdate( settings3DS.ScreenFilter, val ); });
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (画面变得些许面模糊, \"不拉伸\"时不生效.)"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (画面变得些许模糊, 缩放设为\"不拉伸\"时不生效.)"s, ""s);
 
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设置"s);
