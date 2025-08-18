@@ -71,7 +71,7 @@ APP_ROMFS         := $(TOPDIR)/$(ROMFS)
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 COMMON      := -g -w -O3 -mword-relocations -fomit-frame-pointer -ffunction-sections -DVERSION_MAJOR=$(APP_VERSION_MAJOR) -DVERSION_MINOR=$(APP_VERSION_MINOR) -DVERSION_MICRO=$(APP_VERSION_MICRO) $(ARCH) $(INCLUDE) -D__3DS__
 CFLAGS      := $(COMMON) -std=gnu99
-CXXFLAGS    := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++17
+CXXFLAGS    := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++23
 ASFLAGS     := $(ARCH)
 LDFLAGS     = -specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
 
@@ -104,7 +104,7 @@ export DEPSDIR     := $(CURDIR)/$(BUILD)
 
 CFILES             := 
 CPPFILES	:= stb_image_wrapper.cpp 3dsmain.cpp 3dsmenu.cpp 3dsopt.cpp \
-			3dsgpu.cpp 3dssound.cpp 3dsui.cpp 3dsexit.cpp \
+			3dsgpu.cpp 3dssound.cpp 3dsui.cpp 3dsgbk.cpp 3dsutf8togbk.cpp 3dsexit.cpp \
 			3dsconfig.cpp 3dsfiles.cpp 3dsinput.cpp 3dsmatrix.cpp \
 			3dsimpl.cpp 3dsimpl_tilecache.cpp 3dsimpl_gpu.cpp 3dsthemes.cpp 3dssettings.cpp \
 			gpulib.cpp \
@@ -165,6 +165,10 @@ endif
 
 ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
+endif
+
+ifneq ($(RELEASE),)
+	CXXFLAGS += -DRELEASE
 endif
 
 #---------------------------------------------------------------------------------

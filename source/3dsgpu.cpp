@@ -455,6 +455,13 @@ bool gpu3dsInitialize()
         return false;
     }
 
+    GX_MemoryFill(
+        GPU3DS.frameBuffer, 0, &GPU3DS.frameBuffer[240*400],
+        GX_FILL_TRIGGER | GX_FILL_32BIT_DEPTH,
+        GPU3DS.frameDepthBuffer, 0, &GPU3DS.frameDepthBuffer[240*400],
+        GX_FILL_TRIGGER | GX_FILL_32BIT_DEPTH);
+    gspWaitForPSC0();
+
     // Initialize the sub screen for console output.
     //
     consoleInit(screenSettings.SecondScreen, NULL);
@@ -466,7 +473,7 @@ bool gpu3dsInitialize()
     gpuCommandBuffer2 = (u32 *)linearAlloc(COMMAND_BUFFER_SIZE / 2);
     if (gpuCommandBuffer1 == NULL || gpuCommandBuffer2 == NULL)
         return false;
-	GPUCMD_SetBuffer(gpuCommandBuffer1, gpuCommandBufferSize, 0);
+    GPUCMD_SetBuffer(gpuCommandBuffer1, gpuCommandBufferSize, 0);
     gpuCurrentCommandBuffer = 0;
 
 #ifndef RELEASE
@@ -514,8 +521,8 @@ bool gpu3dsInitialize()
 
 	GPUCMD_AddMaskedWrite(GPUREG_EARLYDEPTH_TEST1, 0x1, 0);
 	GPUCMD_AddWrite(GPUREG_EARLYDEPTH_TEST2, 0);
-	GPUCMD_AddWrite(GPUREG_FACECULLING_CONFIG, GPU_CULL_NONE&0x3);
-    
+    GPUCMD_AddWrite(GPUREG_FACECULLING_CONFIG, GPU_CULL_NONE&0x3);
+
 	GPU_SetStencilTest(false, GPU_ALWAYS, 0x00, 0xFF, 0x00);
 	GPU_SetStencilOp(GPU_STENCIL_KEEP, GPU_STENCIL_KEEP, GPU_STENCIL_KEEP);
 
@@ -718,11 +725,11 @@ void gpu3dsStartNewFrame()
 
     if (gpuCurrentCommandBuffer == 0)
     {
-	    GPUCMD_SetBuffer(gpuCommandBuffer1, gpuCommandBufferSize, 0);
+        GPUCMD_SetBuffer(gpuCommandBuffer1, gpuCommandBufferSize, 0);
     }
     else
     {
-	    GPUCMD_SetBuffer(gpuCommandBuffer2, gpuCommandBufferSize, 0);
+        GPUCMD_SetBuffer(gpuCommandBuffer2, gpuCommandBufferSize, 0);
     }
 }
 
@@ -881,7 +888,7 @@ void gpu3dsEnableSubtractiveDiv2Blending()
 void gpu3dsResetState()
 {
 	GPU_DepthMap(-1.0f, 0.0f);
-	GPUCMD_AddWrite(GPUREG_FACECULLING_CONFIG, GPU_CULL_NONE&0x3);
+    GPUCMD_AddWrite(GPUREG_FACECULLING_CONFIG, GPU_CULL_NONE&0x3);
 	GPU_SetStencilTest(false, GPU_ALWAYS, 0x00, 0xFF, 0x00);
 	GPU_SetStencilOp(GPU_STENCIL_KEEP, GPU_STENCIL_KEEP, GPU_STENCIL_KEEP);
 	GPU_SetBlendingColor(0,0,0,0);
@@ -993,23 +1000,21 @@ void gpu3dsSetRenderTargetToTextureSpecific(SGPUTexture *texture, SGPUTexture *d
 
 void gpu3dsFlush()
 {
-	u32* commandBuffer;
+    u32* commandBuffer;
 	u32  commandBuffer_size;
-    
+
 	if(somethingWasDrawn) {
 	    GPUCMD_AddMaskedWrite(GPUREG_PRIMITIVE_CONFIG, 0x8, 0x00000000);
 	    GPUCMD_AddWrite(GPUREG_FRAMEBUFFER_FLUSH, 0x00000001);
 	    GPUCMD_AddWrite(GPUREG_FRAMEBUFFER_INVALIDATE, 0x00000001);
     }
-    
+
 	GPUCMD_Split(&commandBuffer, &commandBuffer_size);
 	GX_FlushCacheRegions (commandBuffer, commandBuffer_size * 4, (u32 *) __ctru_linear_heap, __ctru_linear_heap_size, NULL, 0);
 	GX_ProcessCommandList(commandBuffer, commandBuffer_size * 4, 0x00);
-    
+
     somethingWasFlushed = true;
     somethingWasDrawn = false;
-
-
 }
 
 void gpu3dsWaitForPreviousFlush()
@@ -1116,5 +1121,5 @@ void gpu3dsSetTextureOffset(float u, float v)
 {
     GPU3DS.textureOffset[3] = u;
     GPU3DS.textureOffset[2] = v;
-    GPU_SetFloatUniform(GPU_VERTEX_SHADER, textureOffsetVertexShaderRegister, (u32 *)GPU3DS.textureOffset, 1);    
+    GPU_SetFloatUniform(GPU_VERTEX_SHADER, textureOffsetVertexShaderRegister, (u32 *)GPU3DS.textureOffset, 1);
 }
