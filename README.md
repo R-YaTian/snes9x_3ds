@@ -29,7 +29,6 @@ This fork adds several features to bubble2k's great implementation, giving you m
 ## Setup:
 
 * Download latest cia version [here](https://github.com/R-YaTian/snes9x_3ds/releases) and install via [FBI](https://github.com/Steveice10/FBI/releases).
-* Copy gbk.bin into the /emus3ds folder on your SD card.
 * (Optional) Download latest no-intro sets [here](https://github.com/matbo87/snes9x_3ds-assets/releases).
 
 You can put your SNES games inside any folder. Keep in mind that zip files are not supported. Your game has to be in ".smc", ".sfc" or ".fig" format.<br>
@@ -37,7 +36,6 @@ Configs, saves and other assets are located at **sd:/3ds/snes9x3ds**
 
 ### 3dsx Version:
 * Copy snes9x_3ds.3dsx to **sd:/3ds/snes9x_3ds**
-* Copy gbk.bin into the /emus3ds folder on your SD card.
 * Go to your Homebrew Launcher and launch the snes9x_3ds emulator
 
 
