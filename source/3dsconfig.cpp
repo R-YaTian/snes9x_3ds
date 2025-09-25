@@ -1,12 +1,9 @@
-
 #include <limits>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "3dsconfig.h"
-
-
 
 float config3dsGetVersionFromFile(bool writeMode, bool isGameConfig, char *versionStringFromFile) {
     bool latestVersion = isGameConfig ? GAME_CONFIG_FILE_TARGET_VERSION : GLOBAL_CONFIG_FILE_TARGET_VERSION;
@@ -132,7 +129,6 @@ void config3dsReadWriteString(BufferedFileWriter& stream, bool writeMode,
         }
     }
 }
-
 
 void config3dsReadWriteBitmask(BufferedFileWriter& stream, bool writeMode,
                                const char* format, uint32* bitmask, float versionFromFile)

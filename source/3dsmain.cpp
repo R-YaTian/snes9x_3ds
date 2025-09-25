@@ -902,9 +902,9 @@ std::vector<SMenuItem> makeOptionMenu(std::vector<SMenuTab>& menuTab, int& curre
     AddMenuHeader2(items, "视频"s);
     AddMenuPicker(items, "  缩放"s, "更改画面缩放设置"s, makeOptionsForStretch(), settings3DS.ScreenStretch, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.ScreenStretch, val ); });
-    AddMenuCheckbox(items, "  Linear Filtering"s, settings3DS.ScreenFilter,
+    AddMenuCheckbox(items, "  线性过滤"s, settings3DS.ScreenFilter,
         []( int val ) { CheckAndUpdate( settings3DS.ScreenFilter, val ); });
-    items.emplace_back(nullptr, MenuItemType::Textarea, "  (adds a slight blur, ignored when Scaling = \"No Stretch\")"s, ""s);
+    items.emplace_back(nullptr, MenuItemType::Textarea, "  (会稍微增加模糊效果, 当缩放设置为\"不拉伸\"时无效)"s, ""s);
 
     AddMenuDisabledOption(items, ""s);
     AddMenuHeader2(items, "OSD设置"s);
