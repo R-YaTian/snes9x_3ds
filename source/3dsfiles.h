@@ -13,7 +13,7 @@
 
 enum class FileEntryType { ParentDirectory, ChildDirectory, File };
 
-#define PARENT_DIRECTORY_LABEL "  ... Parent Directory"
+#define PARENT_DIRECTORY_LABEL "  ... 返回上层目录"
 
 #define DIRECTORY_CACHE_THRESHOLD 50
 #define DIRECTORY_CACHE_VERSION 1

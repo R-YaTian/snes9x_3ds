@@ -9,6 +9,7 @@
 #include "3dslog.h"
 #include "3dssettings.h"
 #include "3dsfiles.h"
+#include "3dsutf8togbk.h"
 
 enum class DirCacheStatus {
     Success,
@@ -424,6 +425,8 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, std::vector<SMenuTab>& 
     currentDirRomCount = 0;
     currentDirLoadedFromCache = false;
     files.clear();
+    std::vector<DirectoryEntry> dirs;
+    std::vector<DirectoryEntry> tmps;
 
     // only reserve if we are below our "minimum baseline". 
     if (files.capacity() < intialFileCapacity) {
@@ -465,26 +468,38 @@ bool file3dsGetFiles(std::vector<DirectoryEntry>& files, std::vector<SMenuTab>& 
             continue;
 
         if (entry->d_type == DT_DIR) {
-            files.emplace_back(entry->d_name, FileEntryType::ChildDirectory);
+            dirs.emplace_back(entry->d_name, FileEntryType::ChildDirectory);
         } else if (entry->d_type == DT_REG) {
             if (file3dsIsValidFilename(entry->d_name)) {
-                files.emplace_back(entry->d_name, FileEntryType::File);
+                tmps.emplace_back(entry->d_name, FileEntryType::File);
                 currentDirRomCount++;
 
-                if (files.size() == DIRECTORY_CACHE_THRESHOLD + 1 && showCachingIndicator) {
+                if (((dirs.size() + tmps.size()) == (DIRECTORY_CACHE_THRESHOLD + 1)) && showCachingIndicator) {
                     file3dsShowCachingIndicator(menuTabs);
                 }
             }
         }
     }
-    
+
     closedir(d);
-    
-    // directories first, then alphabetically
-    std::sort(files.begin(), files.end(), [](const DirectoryEntry& a, const DirectoryEntry& b) {
-    if (a.Type != b.Type) return a.Type < b.Type;
-        return strcasecmp(a.Filename, b.Filename) < 0;
+
+    // directories first, then Chinese Pinyin
+    std::sort(dirs.begin(), dirs.end(), [&](const DirectoryEntry& a, const DirectoryEntry& b) {
+        std::string mappedA = mapGBKToInitial(a.Filename);
+        std::string mappedB = mapGBKToInitial(b.Filename);
+        return mappedA.compare(mappedB) < 0;
     });
+
+    std::sort(tmps.begin(), tmps.end(), [&](const DirectoryEntry& a, const DirectoryEntry& b) {
+        std::string mappedA = mapGBKToInitial(a.Filename);
+        std::string mappedB = mapGBKToInitial(b.Filename);
+        return mappedA.compare(mappedB) < 0;
+    });
+
+    files.insert(files.end(), dirs.begin(), dirs.end());
+    files.insert(files.end(), tmps.begin(), tmps.end());
+    dirs.clear();
+    tmps.clear();
 
     osTickCounterUpdate(&timer);
     log3dsWrite("[file3dsGetFiles] %s: %d files prepared in %.3fms", currentDir, files.size(), osTickCounterRead(&timer));
