@@ -1,5 +1,16 @@
 # Snes9x for 3DS
 
+## Chinese Simplified Version
+
+### Credits (CHS Version)
+- [xxxxst](https://github.com/xxxxst): Simple Chinese language directory support and GBK font table
+- [R-YaTian](https://github.com/R-YaTian): Continue work on Chinese language support and Implement Chinese Pinyin sorting for files
+
+### Translators
+- [James-Makoto](https://github.com/James-Makoto)
+- [R-YaTian](https://github.com/R-YaTian)
+- [xxxxst](https://github.com/xxxxst)
+
 ## Overview
 
 This project is a fork of the legacy snes9x_3ds codebase by [bubble2k](https://github.com/bubble2k16/snes9x_3ds) and continues that work with a modernized architecture and improved user experience.
@@ -24,7 +35,7 @@ Feedback and bug reports are welcome.
 ## Setup
 
 * A modded 3DS is required.
-* Install via [Universal Updater](https://universal-team.net/projects/universal-updater.html), or install the latest `.cia` from [Releases](https://github.com/matbo87/snes9x_3ds/releases)
+* Install the latest `.cia` from [Releases](https://github.com/R-YaTian/snes9x_3ds/releases)
 * Optional: download asset packs from [snes9x_3ds-assets releases](https://github.com/matbo87/snes9x_3ds-assets/releases).
 
 ROMs can be stored in any folder. ZIP files are not supported.
