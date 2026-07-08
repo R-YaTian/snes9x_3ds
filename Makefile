@@ -82,7 +82,7 @@ OPT_FLAGS          ?= -g -O3 -ggdb
 RELEASE_OPT_FLAGS  ?= -O3
 COMMON             := $(OPT_FLAGS) $(WARNINGS) -mword-relocations -fomit-frame-pointer -ffunction-sections -DVERSION_MAJOR=$(APP_VERSION_MAJOR) -DVERSION_MINOR=$(APP_VERSION_MINOR) -DVERSION_MICRO=$(APP_VERSION_MICRO) $(ARCH) $(INCLUDE) -D__3DS__
 CFLAGS             := $(COMMON) -std=gnu99
-CXXFLAGS           := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++17
+CXXFLAGS           := $(COMMON) -fno-rtti -fno-exceptions -std=gnu++26
 ASFLAGS            := -g -ggdb -masm-syntax-unified $(ARCH)
 LDSCRIPT           := $(TOPDIR)/link.ld
 LDFLAGS            = -specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map) -T $(LDSCRIPT)
@@ -148,7 +148,7 @@ CPPFILES	:= Snes9x/cpuexec.cpp Snes9x/sa1cpu.cpp Snes9x/sa1.cpp \
 			Snes9x/fxinst_tests.cpp Snes9x/fxinst_test_framework.cpp \
 			png_utils.cpp 3dspixel_utils.cpp 3dsutils.cpp 3dsmain.cpp 3dsmenu.cpp 3dstimer.cpp \
 			3dsgpu.cpp 3dssound.cpp 3dsfont.cpp 3dsglyphs.cpp 3dsui.cpp 3dsui_notif.cpp 3dsui_img.cpp 3dsimg_cache.cpp 3dsexit.cpp \
-			3dsconfig.cpp 3dsfiles.cpp 3dsinput.cpp 3dslcd.cpp \
+			3dsconfig.cpp 3dsfiles.cpp 3dsinput.cpp 3dslcd.cpp 3dsgbk.cpp 3dsutf8togbk.cpp \
 			3dsimpl.cpp 3dsimpl_tilecache.cpp 3dsimpl_gpu.cpp 3dssave.cpp 3dsthemes.cpp 3dssettings.cpp \
 			3dslog.cpp 3dshttp.cpp 3dsra.cpp 3dsra_http.cpp 3dsra_ui.cpp 3dsupdater.cpp 3dsupdater_ui.cpp
 SFILES             := Snes9x/fxinst_asm.s Snes9x/fxinst_asm_speedhack.s

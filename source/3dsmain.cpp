@@ -39,7 +39,7 @@
 #include "3dsupdater.h"
 #include "3dsupdater_ui.h"
 
-inline std::string operator "" _s(const char* s, size_t length) {
+inline std::string operator ""_s(const char* s, size_t length) {
     return std::string(s, length);
 }
 
