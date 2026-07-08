@@ -18,7 +18,7 @@
 #define UPDATER_ASSET_BASE_URL "https://raw.githubusercontent.com/matbo87/snes9x_3ds-assets/master/dist/"
 #define UPDATER_CACHE_MANIFEST_URL UPDATER_ASSET_BASE_URL "thumbnail-caches.txt"
 #define UPDATER_GAME_MANIFEST_URL UPDATER_ASSET_BASE_URL "game-assets.txt"
-#define UPDATER_RELEASES_BASE_URL "https://github.com/matbo87/snes9x_3ds/releases"
+#define UPDATER_RELEASES_BASE_URL "https://github.com/R-YaTian/snes9x_3ds/releases"
 #define UPDATER_LATEST_DOWNLOAD_URL UPDATER_RELEASES_BASE_URL "/latest/download/"
 #define UPDATER_APP_RELEASE_URL UPDATER_LATEST_DOWNLOAD_URL "app-release.txt"
 #define UPDATER_COPY_CHUNK (64 * 1024)
