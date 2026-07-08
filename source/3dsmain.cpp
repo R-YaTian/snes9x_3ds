@@ -32,7 +32,7 @@
 #include "3dsui_img.h"
 #include "3dsmenu.h"
 
-inline std::string operator "" _s(const char* s, size_t length) {
+inline std::string operator ""_s(const char* s, size_t length) {
     return std::string(s, length);
 }
 
