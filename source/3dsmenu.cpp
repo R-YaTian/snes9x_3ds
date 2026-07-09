@@ -56,10 +56,10 @@ static void menu3dsGetDialogLayout(int& topHeight, int& bottomHeight)
 }
 
 MenuButton bottomMenuButtons[] = {
-    {"Select", "\x0cc", 0x800d1d},
-    {"Back", "\x0cd", 0x999409},
-    {"Options", "\x0ce", 0x0d5280},
-    {"Page \x0d1", "\x0cf", 0x0d8014}
+    {"选择", "\x0cc", 0x800d1d},
+    {"返回", "\x0cd", 0x999409},
+    {"设置", "\x0ce", 0x0d5280},
+    {"页面 \x0d1", "\x0cf", 0x0d8014}
 };
 
 
@@ -120,7 +120,7 @@ void menu3dsSetCheatsCount(SMenuItem& item, int active, int total) {
     cheatsTotal = total;
     
     if (total) {
-        item.Text = "ENABLED CHEAT CODES: " +  std::to_string(cheatsActive) + "/" + std::to_string(cheatsTotal);
+        item.Text = "已启动的金手指代码: " +  std::to_string(cheatsActive) + "/" + std::to_string(cheatsTotal);
     }
 }
 
@@ -481,7 +481,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTabs, int& currentMenuTab, int m
             buttonColor = button.color;
         }
         
-        if ((strcmp(button.label, "Options") != 0 && strcmp(button.label, "Page \x0d1") != 0) || menu3dsIsFileTab(currentMenuTab, menuTabs)) {
+        if ((strcmp(button.label, "设置") != 0 && strcmp(button.label, "页面 \x0d1") != 0) || menu3dsIsFileTab(currentMenuTab, menuTabs)) {
             ui3dsDrawRect(bottomMenuPosX + 2, SCREEN_HEIGHT - 13, bottomMenuPosX + 9, SCREEN_HEIGHT - 5,0xffffff);
             bottomMenuPosX = ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, bottomMenuPosX, SCREEN_HEIGHT - 16, bottomMenuPosX + 12, SCREEN_HEIGHT, buttonColor, HALIGN_LEFT,  button.icon) + buttonRightMargin;
             bottomMenuPosX = ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, bottomMenuPosX, SCREEN_HEIGHT - 17, bottomMenuPosX + 100, SCREEN_HEIGHT, Themes[static_cast<int>(settings3DS.Theme)].menuBottomBarTextColor, HALIGN_LEFT, button.label) + buttonLeftMargin;
@@ -489,7 +489,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTabs, int& currentMenuTab, int m
     }
 
     const int rightEdge = battX2 - battFullLevelWidth - battBorderWidth - 6;
-    ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, 97, SCREEN_HEIGHT - 17, rightEdge, SCREEN_HEIGHT, Themes[static_cast<int>(settings3DS.Theme)].menuBottomBarTextColor, HALIGN_RIGHT, settings3dsGetAppVersion("v", GPU3DS.isReal3DS ? "" : "e"));
+    ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, 97, SCREEN_HEIGHT - 17, rightEdge, SCREEN_HEIGHT, Themes[static_cast<int>(settings3DS.Theme)].menuBottomBarTextColor, HALIGN_RIGHT, settings3dsGetAppVersion("v", GPU3DS.isReal3DS ? "c" : "e"));
     
     int maxItems = MENU_HEIGHT;
     int menuStartY = 29;
@@ -513,7 +513,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTabs, int& currentMenuTab, int m
             Themes[static_cast<int>(settings3DS.Theme)].subtitleTextColor);
 
         if (menu3dsIsFileTab(currentMenuTab, menuTabs) && file3dsIsCurrentDirLoadedFromCache()) {
-            const char* cacheBadgeText = "\xfd Cached";
+            const char* cacheBadgeText = "\xfd 已缓存";
             const int cacheBadgePaddingX = 0;
             const int cacheBadgeY = menuStartY - 1;
             const int cacheBadgeRight = settings3DS.SecondScreenWidth - 20;
@@ -1378,52 +1378,52 @@ void menu3dsSetHotkeysData(const char* hotkeysData[HOTKEYS_COUNT][3]) {
         switch(i) {
             case HOTKEY_OPEN_MENU: 
                 hotkeysData[i][0]= "OpenEmulatorMenu";
-                hotkeysData[i][1]= "  Open Emulator Menu"; 
+                hotkeysData[i][1]= "  打开模拟器菜单"; 
                 hotkeysData[i][2]= "";
                 break;
             case HOTKEY_FAST_FORWARD_TOGGLE:
                 hotkeysData[i][0]= "FastForwardToggle";
-                hotkeysData[i][1]= "  Fast-Forward (Toggle)"; 
-                hotkeysData[i][2]= "Fast-forward while this hotkey is toggled on.\nMay corrupt/freeze games on Old 3DS.";
+                hotkeysData[i][1]= "  加速 (切换)"; 
+                hotkeysData[i][2]= "该热键按完后加速\n在旧款3DS上可能会出现错误或卡死";
                 break;
             case HOTKEY_SWAP_CONTROLLERS: 
                 hotkeysData[i][0]= "SwapControllers"; 
-                hotkeysData[i][1]= "  Swap Controllers"; 
-                hotkeysData[i][2]= "Allows you to control Player 2 (e.g. for using Konami Cheat)";
+                hotkeysData[i][1]= "  切换控制器"; 
+                hotkeysData[i][2]= "允许使用2P控制器(可用于输入KONAMI秘籍)";
                 break;
             case HOTKEY_SCREENSHOT: 
                 hotkeysData[i][0]= "TakeScreenshot"; 
-                hotkeysData[i][1]= "  Screenshot"; 
-                hotkeysData[i][2]= "Takes a Screenshot from the current game";
+                hotkeysData[i][1]= "  截屏"; 
+                hotkeysData[i][2]= "为当前游戏截屏";
                 break;
             case HOTKEY_QUICK_SAVE: 
                 hotkeysData[i][0]= "QuickSave"; 
-                hotkeysData[i][1]= "  Quick Save"; 
-                hotkeysData[i][2]= "Saves the Game to last used Save Slot";
+                hotkeysData[i][1]= "  快速保存即时存档"; 
+                hotkeysData[i][2]= "在上次使用的存档位保存游戏进度";
                 break;
             case HOTKEY_QUICK_LOAD: 
                 hotkeysData[i][0]= "QuickLoad"; 
-                hotkeysData[i][1]= "  Quick Load"; 
-                hotkeysData[i][2]= "Loads the Game from last used Save Slot";
+                hotkeysData[i][1]= "  快速读取即时存档"; 
+                hotkeysData[i][2]= "从上次使用的存档位读取游戏进度";
                 break;
             case HOTKEY_SAVE_SLOT_NEXT: 
                 hotkeysData[i][0]= "SaveSlotNext"; 
-                hotkeysData[i][1]= "  Save Slot +"; 
-                hotkeysData[i][2]= "Selects next Save Slot";
+                hotkeysData[i][1]= "  向后切换存档位"; 
+                hotkeysData[i][2]= "选择下一个存档位";
                 break;
             case HOTKEY_SAVE_SLOT_PREV: 
                 hotkeysData[i][0]= "SaveSlotPrev"; 
-                hotkeysData[i][1]= "  Save Slot -"; 
-                hotkeysData[i][2]= "Selects previous Save Slot";
+                hotkeysData[i][1]= "  向前切换存档位"; 
+                hotkeysData[i][2]= "选择上一个存档位";
                 break;
             case HOTKEY_FAST_FORWARD_HOLD:
                 hotkeysData[i][0]= "FastForwardHold";
-                hotkeysData[i][1]= "  Fast-Forward (Hold)";
-                hotkeysData[i][2]= "Fast-forward while this hotkey is held down.\nMay corrupt/freeze games on Old 3DS.";
+                hotkeysData[i][1]= "  加速 (按住)";
+                hotkeysData[i][2]= "按住该热键时加速\n在旧款3DS上可能会出现错误或卡死";
                 break;
             default: 
                 hotkeysData[i][0]= ""; 
-                hotkeysData[i][1]= "  <empty>"; 
+                hotkeysData[i][1]= "  <空>"; 
                 hotkeysData[i][2]= ""; 
         }
     }
@@ -1434,23 +1434,23 @@ std::string menu3dsGetRomInfo() {
     std::string text;
     text.reserve(256);
 
-    snprintf(line, sizeof(line), "Cart Name: %s", Memory.ROMName);
+    snprintf(line, sizeof(line), "卡带名称: %s", Memory.ROMName);
     text += line;
-    snprintf(line, sizeof(line), "\nGame Code: %s", Memory.ROMId);
+    snprintf(line, sizeof(line), "\n游戏代号: %s", Memory.ROMId);
     text += line;
     snprintf(line, sizeof(line), "\nContents: %s", Memory.KartContents());
     text += line;
     snprintf(line, sizeof(line), "\nMap: %s", Memory.MapType());
     text += line;
-    snprintf(line, sizeof(line), "\nSpeed: 0x%02X (%s)", Memory.ROMSpeed, (Memory.ROMSpeed & 0x10) ? "FastROM" : "SlowROM");
+    snprintf(line, sizeof(line), "\n速度: 0x%02X (%s)", Memory.ROMSpeed, (Memory.ROMSpeed & 0x10) ? "快速ROM" : "慢速ROM");
     text += line;
-    snprintf(line, sizeof(line), "\nVideo Output: %s", (Memory.ROMRegion > 12 || Memory.ROMRegion < 2) ? "NTSC 60Hz" : "PAL 50Hz");
+    snprintf(line, sizeof(line), "\n视频制式: %s", (Memory.ROMRegion > 12 || Memory.ROMRegion < 2) ? "NTSC 60Hz" : "PAL 50Hz");
     text += line;
-    snprintf(line, sizeof(line), "\nRegion: %s", Memory.Country());
+    snprintf(line, sizeof(line), "\n区域: %s", Memory.Country());
     text += line;
-    snprintf(line, sizeof(line), "\nSize (header): %s", Memory.Size());
+    snprintf(line, sizeof(line), "\n容量 (从文件头): %s", Memory.Size());
     text += line;
-    snprintf(line, sizeof(line), "\nSRAM size: %s", Memory.StaticRAMSize());
+    snprintf(line, sizeof(line), "\nSRAM 大小: %s", Memory.StaticRAMSize());
     text += line;
     snprintf(line, sizeof(line), "\nCRC32: 0x%08X", Memory.ROMCRC32);
     text += line;

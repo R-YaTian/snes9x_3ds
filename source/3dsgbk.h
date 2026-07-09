@@ -4,6 +4,6 @@
 #include <3ds.h>
 
 extern uint8 *fontGBK;
-extern void gbk3dsLoadGBKImage();
+void gbk3dsLoadGBKImage();
 
 #endif
