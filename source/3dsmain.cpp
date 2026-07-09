@@ -378,7 +378,7 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
                         bool forceSave = confirmDialog(
                             dialogTab, isDialog, currentMenuTab, menuTabs,
                             "即时存档",
-                            "检测到可能发生的SPC音频问题,推荐暂时回到游戏画面并重新尝试保存!现在仍然要保存吗?",
+                            "检测到可能的SPC音频问题,推荐暂时回到游戏画面\n并重新尝试保存!现在仍然要保存吗?",
                             true, false
                         );
 
@@ -462,9 +462,9 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     AddMenuHeader1(items, "外观设置"_s);
 
     const char* gameThumbnailMessage = 
-        "选择缩略图类型,请下载最新的*.cache文件,下载地址:\n"
+        "选择缩略图类型,请下载最新.cache文件,下载地址:\n"
         "github.com/matbo87/snes9x_3ds-assets\n"
-        "将下载到的文件放置到SD卡的3ds/snes9x_3ds/thumbnails目录";
+        "将下载到的文件放置到SD卡的\n3ds/snes9x_3ds/thumbnails目录";
 
     AddMenuPicker(items, "  游戏缩略图"_s, gameThumbnailMessage, makeOptionsForGameThumbnail(), static_cast<int>(settings3DS.GameThumbnailType), DIALOG_TYPE_INFO, true,
         []( int val ) { 
@@ -824,7 +824,7 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
 
 
 
-    AddMenuPicker(items, "  游戏画面背景"_s, "最大400x240分辨率图片显示于游戏后方,受3D效果影响\n路径 = \"/3ds/snes9x3ds/backgrounds/game_screen/\"\n裁剪的文件名 (例 Axelay.png) 或 _default.png"_s,
+    AddMenuPicker(items, "  游戏画面背景"_s, "最大400x240图片显示于游戏后方,支持3D景深\n路径 = \"/3ds/snes9x3ds/backgrounds/game_screen/\"\n裁剪的文件名 (例 Axelay.png) 或 _default.png"_s,
         makeOptionsForOnScreenDisplay(), static_cast<int>(settings3DS.GameScreenBg), DIALOG_TYPE_INFO, true,
                     []( int val ) {
                         bool wasShown = settings3DS.GameScreenBg != Setting::AssetMode::None;
@@ -877,7 +877,7 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
     
     AddMenuPicker(items, "  帧率"_s, "PAL制式游戏默认运行于50帧\n可在需要时启用60帧覆盖设置"_s, makeOptionsForFrameRate(), static_cast<int>(settings3DS.Framerate), DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.Framerate, static_cast<Setting::Framerate>(val) ); });
-    AddMenuPicker(items, "  帧同步方式"_s, "VBlank Sync对大多数游戏是最好方案\n若游戏卡顿或无法保持全速,请尝试Sleep Sync\n在旧款3DS上,该方案将帮助高配置游戏(例如DKC2)运行地更加平滑"_s,
+    AddMenuPicker(items, "  帧同步方式"_s, "VBlank Sync对大多数游戏是最好方案.若游戏卡顿\n或无法保持全速,请尝试Sleep Sync.在旧款3DS上,\n该方案将帮助高配置游戏(例如DKC2)运行更加平滑"_s,
                   makeOptionsForFrameSync(), static_cast<int>(settings3DS.FrameSync), DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate(settings3DS.FrameSync, static_cast<Setting::FrameSync>(val)); });
 
@@ -908,7 +908,7 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                         settings3DS.Volume = settings3DS.GlobalVolume;
                 });
 
-    AddMenuPicker(items, "  音频缓冲"_s, "较高的值可以减少爆音(尤其是在旧款3DS上),但代价是音频延迟会增加"_s, makePickerOptions({"低", "常规", "高"}), settings3DS.AudioBuffer, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  音频缓冲"_s, "较高的值可以减少爆音(尤其是在旧款3DS上)\n但代价是音频延迟会增加"_s, makePickerOptions({"低", "常规", "高"}), settings3DS.AudioBuffer, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.AudioBuffer, val ); });
 
     AddMenuDisabledOption(items, ""_s);

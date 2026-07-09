@@ -43,8 +43,8 @@ static void menu3dsGetDialogLayout(int& topHeight, int& bottomHeight)
 {
     if (dialogTextLines > 0)
     {
-        topHeight = 35 + dialogTextLines * FONT_HEIGHT;
-        bottomHeight = 19 + menu3dsGetDialogVisibleItems() * FONT_HEIGHT;
+        topHeight = 35 + dialogTextLines * (FONT_HEIGHT + 2);
+        bottomHeight = 19 + menu3dsGetDialogVisibleItems() * (FONT_HEIGHT + 2);
         if (topHeight + bottomHeight > SCREEN_HEIGHT)
             topHeight = SCREEN_HEIGHT - bottomHeight;
     }
@@ -489,7 +489,7 @@ void menu3dsDrawMenu(std::vector<SMenuTab>& menuTabs, int& currentMenuTab, int m
     }
 
     const int rightEdge = battX2 - battFullLevelWidth - battBorderWidth - 6;
-    ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, 97, SCREEN_HEIGHT - 17, rightEdge, SCREEN_HEIGHT, Themes[static_cast<int>(settings3DS.Theme)].menuBottomBarTextColor, HALIGN_RIGHT, settings3dsGetAppVersion("v", GPU3DS.isReal3DS ? "c" : "e"));
+    ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, 97, SCREEN_HEIGHT - 17, rightEdge, SCREEN_HEIGHT, Themes[static_cast<int>(settings3DS.Theme)].menuBottomBarTextColor, HALIGN_RIGHT, settings3dsGetAppVersion("v"));
     
     int maxItems = MENU_HEIGHT;
     int menuStartY = 29;

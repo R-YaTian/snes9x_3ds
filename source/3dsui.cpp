@@ -687,7 +687,7 @@ void ui3dsDrawStringWithWrapping(gfxScreen_t targetScreen, int x0, int y0, int x
             }
 
             ui3dsDrawRGB565_StringToFramebuffer(targetScreen, x, y0, color, buffer, strLineStart[i], strLineEnd[i]);
-            y0 += 12;
+            y0 += 14;
         }
     }
 
