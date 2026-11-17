@@ -61,12 +61,12 @@ const char* file3dsThumbnailCacheName(Setting::ThumbnailMode mode) {
 
 const char* file3dsThumbnailLabel(Setting::ThumbnailMode mode) {
     switch (mode) {
-        case Setting::ThumbnailMode::CoverUS:       return "Cover (US)";
-        case Setting::ThumbnailMode::CoverJapan:    return "Cover (Japan)";
-        case Setting::ThumbnailMode::CoverPAL:      return "Cover (PAL)";
-        case Setting::ThumbnailMode::Title:         return "Title";
-        case Setting::ThumbnailMode::Gameplay:      return "Gameplay";
-        default:                                    return "None";
+        case Setting::ThumbnailMode::CoverUS:       return "封面 (美版)";
+        case Setting::ThumbnailMode::CoverJapan:    return "封面 (日版)";
+        case Setting::ThumbnailMode::CoverPAL:      return "封面 (欧版)";
+        case Setting::ThumbnailMode::Title:         return "游戏标题";
+        case Setting::ThumbnailMode::Gameplay:      return "游戏画面";
+        default:                                    return "无";
     }
 }
 

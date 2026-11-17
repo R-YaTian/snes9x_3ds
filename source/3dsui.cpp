@@ -13,6 +13,8 @@
 #include "3dsfiles.h"
 #include "3dsfont.h"
 #include "3dsui.h"
+#include "3dsgbk.h"
+#include "3dsutf8togbk.h"
 
 #define MAX_ALPHA 8
 #define FONT_CELL_WIDTH 16
@@ -24,6 +26,11 @@ typedef struct
     int green[MAX_ALPHA + 1][32];
     int blue[MAX_ALPHA + 1][32];
 } SAlpha;
+
+const int gbkRowStart = 0xa1;
+const int gbkRowEnd = 0xf7;
+const int gbkColStart = 0xa1;
+const int gbkColEnd = 0xfe;
 
 static u8 *fontWidthArray[] = { fontTempestaWidth, fontRondaWidth };
 static u8 *fontBitmapArray[] = { fontTempestaBitmap, fontRondaBitmap };
@@ -377,6 +384,55 @@ static int ui3dsDrawUpscaledCharToTexture(u16 *buffer, u8 c, int xStart, int ySt
     return destWidth;
 }
 
+//---------------------------------------------------------------
+// Draws a gbk character to the screen
+//---------------------------------------------------------------
+void ui3dsDrawGBK(u16 *frameBuffer, int x, int y, int color565, u16 ch) {
+    // const int rowCount = (gbkRowEnd - gbkRowStart + 1);
+    const int colCount = (gbkColEnd - gbkColStart + 1);
+
+    int r = ch >> 8;
+    int c = ch & 0xff;
+
+    if(fontGBK == NULL
+        || r < gbkRowStart || r > gbkRowEnd
+        || c < gbkColStart || c > gbkColEnd){
+        ui3dsDrawRGB565_CharToFramebuffer(frameBuffer, x, y, color565, '?');
+        return;
+    }
+
+    // Draws a character to the screen at (x,y)
+    // (0,0) is at the top left of the screen.
+    int wid = 12;
+    int idx = (r - gbkRowStart) * colCount + (c - gbkColStart);
+    u8 alpha;
+
+    if (y >= viewportY1 && y < viewportY2)
+    {
+        for (int x1 = 0; x1 < wid; x1++)
+        {
+            #define GETGBKFONTBITMAP(c, x, y) fontGBK[c * 256 + x + (y+1)*16]
+
+            #define SETPIXELFROMGBKBITMAP(y1) \
+                alpha = GETGBKFONTBITMAP(idx,x1,y1); \
+                ui3dsSetPixelInline(frameBuffer, cx, cy + y1, \
+                alpha == MAX_ALPHA ? color565 : \
+                alpha == 0x0 ? -1 : \
+                    ui3dsBlendPixel565(color565, ui3dsGetPixelInline(frameBuffer, cx, cy + y1), alpha));
+
+            int cx = (x + x1);
+            int cy = (y);
+            if (cx >= viewportX1 && cx < viewportX2)
+            {
+                for (int h = 0; h < fontHeight; h++)
+                {
+                    SETPIXELFROMGBKBITMAP(h);
+                }
+            }
+        }
+    }
+}
+
 int ui3dsDrawRGBA4_CharToTexture(u16 *buffer, u8 c, int xStart, int yStart, int xMax, int yMax,  u16 color)
 {
     if (c == 0) return 0;
@@ -422,6 +478,27 @@ int ui3dsGetStringWidth(const char *s, int startPos, int endPos, int destHeight)
 
         if (c == '\n')
             c = ' ';
+
+        // check utf8 char is chinese
+        if(fontGBK != NULL && i <= endPos - 2 && (c & 0xF0) == 0xE0) {
+            u8 c2 = s[i + 1];
+            u8 c3 = s[i + 2];
+
+            u16 chUtf8 = ((c & 0x0F) << 12)
+                | ((c2 & 0x3F) << 6)
+                | ((c3 & 0x3F));
+            u16 chGBK = getGbkChar(chUtf8);
+
+            u8 cg1 = (chGBK & 0xFF00) >> 8;
+            u8 cg2 = (chGBK & 0x00FF);
+
+            if(cg1 >= gbkRowStart && cg1 <= gbkRowEnd
+                && cg2 >= gbkColStart && cg2 <= gbkColEnd) {
+                totalWidth += 12;
+                i += 2;
+                continue;
+            }
+        }
 
         totalWidth += ui3dsCharAdvance(c, scale);
     }
@@ -631,7 +708,29 @@ int ui3dsDrawRGB565_StringToFramebuffer(gfxScreen_t targetScreen, int absoluteX,
             if (c == '\n') {
                 c = ' ';
             }
-            
+
+            // check utf8 char is chinese
+            if(fontGBK != NULL && i <= endPos - 2 && (c & 0xF0) == 0xE0) {
+                u8 c2 = buffer[i + 1];
+                u8 c3 = buffer[i + 2];
+
+                u16 chUtf8 = ((c & 0x0F) << 12)
+                    | ((c2 & 0x3F) << 6)
+                    | ((c3 & 0x3F));
+                u16 chGBK = getGbkChar(chUtf8);
+
+                u8 cg1 = (chGBK & 0xFF00) >> 8;
+                u8 cg2 = (chGBK & 0x00FF);
+
+                if(cg1 >= gbkRowStart && cg1 <= gbkRowEnd
+                    && cg2 >= gbkColStart && cg2 <= gbkColEnd) {
+                    ui3dsDrawGBK(fb, x, y, color565, chGBK);
+                    x += 12;
+                    i += 2;
+                    continue;
+                }
+            }
+
             if (c != ' ')
                 ui3dsDrawRGB565_CharToFramebuffer(fb, x, y, color565, c);
             x += fontWidth[c];
@@ -654,9 +753,9 @@ int ui3dsWrapLines(const char *buffer, int maxWidth, int *lineStart, int *lineEn
 
     int slen = strlen(buffer);
     int curStartPos = 0;
-    int curEndPos = slen - 1;
-    int lineWidth = 0;
-    for (int i = 0; i < slen; )
+    int curEndPos = slen;
+    u16 lineWidth = 0;
+    for (int i = 0; i <= slen; )
     {
         bool forceBreak = buffer[i] == '\n';
         if (forceBreak)
@@ -666,11 +765,33 @@ int ui3dsWrapLines(const char *buffer, int maxWidth, int *lineStart, int *lineEn
             if (buffer[i] == ' ' && i > 0 && buffer[i-1] != ' ')
                 curEndPos = i - 1;
             // Break after a dash or slash only if it still fits, else it gets clipped.
-            else if ((buffer[i] == '-' || buffer[i] == '/') &&
+            else if ((buffer[i] == '-') &&
                      lineWidth + fontWidth[(unsigned char)buffer[i]] <= maxWidth)
                 curEndPos = i;
         }
-        lineWidth += fontWidth[(unsigned char)buffer[i]];
+
+        // check utf8 char is chinese
+        if((buffer[i] & 0xF0) == 0xE0 && i <= slen - 2) {
+            u8 c2 = buffer[i + 1];
+            u8 c3 = buffer[i + 2];
+
+            u16 chUtf8 = ((buffer[i] & 0x0F) << 12)
+                | ((c2 & 0x3F) << 6)
+                | ((c3 & 0x3F));
+            u16 chGBK = getGbkChar(chUtf8);
+
+            u8 cg1 = (chGBK & 0xFF00) >> 8;
+            u8 cg2 = (chGBK & 0x00FF);
+
+            if(cg1 >= gbkRowStart && cg1 <= gbkRowEnd
+                && cg2 >= gbkColStart && cg2 <= gbkColEnd) {
+                lineWidth += 12;
+                i += 2;
+            } else
+                lineWidth += fontWidth[(unsigned char)buffer[i]];
+        } else
+            lineWidth += fontWidth[(unsigned char)buffer[i]];
+
         if (forceBreak || lineWidth > maxWidth)
         {
             lineStart[strLineCount] = curStartPos;
@@ -693,14 +814,14 @@ int ui3dsWrapLines(const char *buffer, int maxWidth, int *lineStart, int *lineEn
                     i++;
             }
             curStartPos = i;
-            curEndPos = slen - 1;
+            curEndPos = slen;
             lineWidth = 0;
         }
         else
             i++;
     }
 
-    curEndPos = slen - 1;
+    curEndPos = slen;
     if (curStartPos <= curEndPos && strLineCount < maxEntries)
     {
         lineStart[strLineCount] = curStartPos;

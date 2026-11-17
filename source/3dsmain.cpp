@@ -22,6 +22,7 @@
 #include "3dsra.h"
 #include "3dstimer.h"
 #include "3dsexit.h"
+#include "3dsgbk.h"
 #include "3dsconfig.h"
 #include "3dsfiles.h"
 #include "3dsinput.h"
@@ -161,12 +162,12 @@ std::vector<SMenuItem> makeOptionsForResetConfig() {
     std::vector<SMenuItem> items;
     items.reserve(4);
 
-    AddMenuDialogOption(items, 0, "Cancel"_s, ""_s);
+    AddMenuDialogOption(items, 0, "无"_s, ""_s);
 
     if (cfgFileAvailable[0]) {
-        AddMenuDialogOption(items, 1, "Global"_s, "settings.cfg"_s);
+        AddMenuDialogOption(items, 1, "全局设置"_s, "settings.cfg"_s);
     }
-     
+
     if (cfgFileAvailable[1]) {
         char gameConfigFilename[128];
         char basename[NAME_MAX + 1];
@@ -178,13 +179,13 @@ std::vector<SMenuItem> makeOptionsForResetConfig() {
             snprintf(gameConfigFilename, sizeof(gameConfigFilename), "%s%s", basename, ".cfg");
         }
 
-        AddMenuDialogOption(items, 2, "Game"_s, gameConfigFilename);
+        AddMenuDialogOption(items, 2, "游戏设置"_s, gameConfigFilename);
     }
 
     if (cfgFileAvailable[0] && cfgFileAvailable[1]) {
-        AddMenuDialogOption(items, 3, "Both"_s, ""_s);
+        AddMenuDialogOption(items, 3, "以上两者"_s, ""_s);
     }
-    
+
     return items;
 }
 
@@ -210,7 +211,7 @@ const std::vector<SMenuItem>& makeOptionsForGameThumbnail() {
         if (file3dsThumbnailsAvailableByType(mode)) {
             AddMenuDialogOption(items, static_cast<int>(mode), label, "");
         } else {
-            items.emplace_back(nullptr, MenuItemType::Disabled, label, "Not on SD card"_s, -1);
+            items.emplace_back(nullptr, MenuItemType::Disabled, label, "文件不存在"_s, -1);
         }
     }
 
@@ -223,7 +224,7 @@ std::vector<SMenuItem> makeOptionsForFileMenu(std::vector<FileMenuOption>& optio
 
     // set default Directory
     if (strcmp(settings3DS.defaultDir, file3dsGetCurrentDir()) != 0) {
-        AddMenuDialogOption(items, options.size(), "Use this folder at startup", "");
+        AddMenuDialogOption(items, options.size(), "将当前目录设为默认路径", "");
         options.push_back(FileMenuOption::SetDefaultDir);
     }
 
@@ -240,7 +241,7 @@ std::vector<SMenuItem> makeOptionsForFileMenu(std::vector<FileMenuOption>& optio
             snprintf(label, sizeof(label), "%s", dirStr);
         }
 
-        AddMenuDialogOption(items, options.size(), "Clear startup folder", label);
+        AddMenuDialogOption(items, options.size(), "重置默认路径", label);
         options.push_back(FileMenuOption::ResetDefaultDir);
     }
 
@@ -251,19 +252,19 @@ std::vector<SMenuItem> makeOptionsForFileMenu(std::vector<FileMenuOption>& optio
     if (IsFileExists(cachePath)) {
         const char* dateStr = file3dsGetCurrentDirCacheDate();
 
-        AddMenuDialogOption(items, options.size(), "Refresh ROM list", dateStr ? dateStr : "");
+        AddMenuDialogOption(items, options.size(), "刷新 ROM 列表", dateStr ? dateStr : "");
         options.push_back(FileMenuOption::RescanDir);
     }
 
     // random game
     if (file3dsGetCurrentDirRomCount() > 1) {
-        AddMenuDialogOption(items, options.size(), "Choose a random game in this folder", "");
+        AddMenuDialogOption(items, options.size(), "在当前路径选取随机游戏", "");
         options.push_back(FileMenuOption::RandomGame);
     }
 
     // delete Game
     if (selectedFileName && selectedFileName[0] != '\0') {
-        AddMenuDialogOption(items, options.size(), "Delete selected game", "");
+        AddMenuDialogOption(items, options.size(), "删除所选的游戏", "");
         options.push_back(FileMenuOption::DeleteGame);
     }
 
@@ -272,7 +273,7 @@ std::vector<SMenuItem> makeOptionsForFileMenu(std::vector<FileMenuOption>& optio
 
 bool confirmDialog(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, std::vector<SMenuTab>& menuTabs, const std::string& title, const std::string& message, bool fade, bool hideAfter) {
     int result = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, message,
-        Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakePickerOptions({ "Yes", "No" }), 1, fade);
+        Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakePickerOptions({ "是", "否" }), 1, fade);
 
     if (hideAfter) {
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs, fade);
@@ -293,22 +294,22 @@ static void activateRaForRunningGame(SMenuTab& dialogTab, bool& isDialog, int& c
     char message[128];
     char prefix[80] = "";
     if (userName && userName[0])
-        snprintf(prefix, sizeof(prefix), "Logged in as %s.\n", userName);
+        snprintf(prefix, sizeof(prefix), "已登入为 %s\n", userName);
 
     ra3dsLoadGame();
     menu3dsWaitForPendingRaRequest([&] {
-        snprintf(message, sizeof(message), "%sLooking for achievements...", prefix);
-        showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, message, "Press [B] to skip.");
+        snprintf(message, sizeof(message), "%s查找成就...", prefix);
+        showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, message, "按 [B] 跳过");
     });
 
     menu3dsRunBadgeDownload([&](bool isDownloading, int downloadedCount, int downloadCount) {
         if (isDownloading)
-            snprintf(message, sizeof(message), "%sDownloading badges: %d/%d",
+            snprintf(message, sizeof(message), "%s正在下载徽章: %d/%d",
                      prefix, downloadedCount, downloadCount);
         else
-            snprintf(message, sizeof(message), "%sSaving badges to SD (~%.1f MB)...",
+            snprintf(message, sizeof(message), "%s正在保存徽章到 SD (~%.1f MB)...",
                      prefix, (double)ra3dsEstimateBadgeCacheBytes() / (1024.0 * 1024.0));
-        showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, message, isDownloading ? "Press [B] to skip." : "");
+        showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, message, isDownloading ? "按 [B] 跳过" : "");
     });
 }
 
@@ -320,15 +321,15 @@ static void appendRaLogoutItem(std::vector<SMenuItem>& items, std::vector<SMenuT
     items.emplace_back([&menuTabs, &currentMenuTab](int val) {
         SMenuTab dialogTab;
         bool isDialog = false;
-        if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements"_s, "Log out of RetroAchievements?"_s, true, false)) {
+        if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements"_s, "是否登出 RetroAchievements?"_s, true, false)) {
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
             return;
         }
         ra3dsLogout();
         menu3dsMarkTabDirty(TAB_EMULATOR);
-        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements", "Logged out.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
+        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements", "已登出", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
-    }, MenuItemType::Action, "  Log out", std::string(info));
+    }, MenuItemType::Action, "  登出", std::string(info));
 }
 
 static void appendRaLoginItem(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTabs, int& currentMenuTab) {
@@ -344,7 +345,7 @@ static void appendRaLoginItem(std::vector<SMenuItem>& items, std::vector<SMenuTa
         if (result == RA_LOGIN_PENDING) {
             ra3dsBeginLogin();
             menu3dsWaitForPendingRaRequest([&] {
-                showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Signing in...", "Press [B] to cancel.");
+                showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "正在登录...", "按 [B] 取消");
             });
             result = ra3dsIsLoggedIn() ? RA_LOGIN_OK
                      : ra3dsGetLastError()[0] ? RA_LOGIN_FAILED
@@ -360,21 +361,21 @@ static void appendRaLoginItem(std::vector<SMenuItem>& items, std::vector<SMenuTa
             if (session3DS.isRomLoaded)
                 activateRaForRunningGame(dialogTab, isDialog, currentMenuTab, menuTabs, raUser.name);
 
-            snprintf(message, sizeof(message), "Logged in as %s.", raUser.name);
+            snprintf(message, sizeof(message), "已登入为 %s", raUser.name);
             menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
         } else if (result == RA_LOGIN_FAILED) {
-            snprintf(message, sizeof(message), "Login failed: %s", ra3dsGetLastError());
+            snprintf(message, sizeof(message), "登录失败: %s", ra3dsGetLastError());
             menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
         }
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
-    }, ra3dsLoginInFlight() ? MenuItemType::Disabled : MenuItemType::Action, "  Log in", "");
-    AddMenuNote(items, "  Unlock achievements as you play and track your progress online. Requires a free account from retroachievements.org.");
+    }, ra3dsLoginInFlight() ? MenuItemType::Disabled : MenuItemType::Action, "  登录", "");
+    AddMenuNote(items, "  在游戏中解锁成就并在线跟踪进度.需要从 retroachievements.org 注册免费账户");
 }
 
 static void appendRaGameItems(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTabs, int& currentMenuTab) {
     bool hasAchievements = ra3dsGetAchievementCount() > 0;
 
-    AddMenuCheckbox(items, "  Enabled for this game", settings3DS.RAEnabled,
+    AddMenuCheckbox(items, "  为当前游戏启用", settings3DS.RAEnabled,
         [&menuTabs, &currentMenuTab]( int val ) {
             if (!CheckAndUpdateToggle(settings3DS.RAEnabled, val))
                 return;
@@ -396,13 +397,13 @@ static void appendRaGameItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
 
     if (hasAchievements) {
         AddMenuSpacer(items);
-        AddMenuCheckbox(items, "  Show active challenges on the game screen", settings3DS.RAChallengeIndicators,
+        AddMenuCheckbox(items, "  在游戏屏幕上显示当前挑战", settings3DS.RAChallengeIndicators,
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAChallengeIndicators, val); });
-        AddMenuCheckbox(items, "  Show achievement progress on the game screen", settings3DS.RAProgressIndicator,
+        AddMenuCheckbox(items, "  在游戏屏幕上显示成就进度", settings3DS.RAProgressIndicator,
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAProgressIndicator, val); });
-        AddMenuCheckbox(items, "  Encore mode (reactivate unlocked achievements)", settings3DS.RAEncoreMode,
+        AddMenuCheckbox(items, "  返场模式(重新激活已解锁的成就)", settings3DS.RAEncoreMode,
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAEncoreMode, val); });
-        AddMenuNote(items, "  Encore mode takes effect after reloading the game.");
+        AddMenuNote(items, "  返场模式在重载游戏后生效");
         AddMenuSpacer(items);
     }
 }
@@ -429,9 +430,9 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
     items.emplace_back(nullptr, MenuItemType::Action, menu3dsSubPageBackLabel(), "");
     AddMenuSpacer(items);
 
-    AddMenuCheckbox(items, "  Overwrite slots without asking"_s, settings3DS.OverwriteSavestatesWithoutAsking,
+    AddMenuCheckbox(items, "  覆盖存档位而不询问"_s, settings3DS.OverwriteSavestatesWithoutAsking,
         []( int val ) { CheckAndUpdateToggle( settings3DS.OverwriteSavestatesWithoutAsking, val ); });
-    AddMenuNote(items, "  Quick save always overwrites the current slot without asking.");
+    AddMenuNote(items, "  快速存档总是覆盖当前存档位而不询问");
     AddMenuSpacer(items);
 
     saveLoadFirstSaveRow = items.size();
@@ -440,7 +441,7 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
     for (int slot = 1; slot <= SAVESLOTS_MAX; ++slot) {
         bool hasState = sav3dsSlotHasState(slot);
         bool isCurrent = (slot == settings3DS.CurrentSaveSlot);
-        snprintf(slotInfo, sizeof(slotInfo), "  Save Slot #%d", slot);
+        snprintf(slotInfo, sizeof(slotInfo), "  存档位 #%d", slot);
 
         items.emplace_back(
             [slot, &menuTabs, &currentMenuTab](int) {
@@ -451,10 +452,10 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
                 bool askFirst = sav3dsSlotHasState(slot) && !settings3DS.OverwriteSavestatesWithoutAsking;
 
                 char title[32];
-                snprintf(title, sizeof(title), "Save Slot #%d", slot);
+                snprintf(title, sizeof(title), "存档位 #%d", slot);
 
                 if (askFirst) {
-                    bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "This slot already has a save. Overwrite it?", true, false);
+                    bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "该存档位已有存档.是否覆盖?", true, false);
 
                     if (!confirmed) {
                         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
@@ -463,24 +464,24 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
                     }
                 }
 
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "Saving...", Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, std::vector<SMenuItem>(), -1, !askFirst);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "正在保存...", Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, std::vector<SMenuItem>(), -1, !askFirst);
                 result = sav3dsSaveSlot(slot);
 
                 if (result != SAVE_WRITE_OK) {
                     const char *failMessage = result == SAVE_WRITE_FAILED
-                        ? "Saving failed. The incomplete save was deleted. Check the SD card."
-                        : "Saving failed.";
+                        ? "保存失败.不完整的存档已被删除.请检查 SD 卡."
+                        : "保存失败.";
                     menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, failMessage, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
                     menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
                 }
                 else
                 {
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "Saved.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "保存成功", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
                     menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
                     CheckAndUpdate( settings3DS.CurrentSaveSlot, slot );
                 }
             },
-            MenuItemType::Action, slotInfo, isCurrent ? "Current" : ""
+            MenuItemType::Action, slotInfo, isCurrent ? "当前的" : ""
         );
         items.back().Dimmed = !hasState;
     }
@@ -492,7 +493,7 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
             continue;
 
         hasLoadRows = true;
-        snprintf(slotInfo, sizeof(slotInfo), "  Load Slot #%d", slot);
+        snprintf(slotInfo, sizeof(slotInfo), "  读取存档位 #%d", slot);
 
         items.emplace_back([slot, &menuTabs, &currentMenuTab](int val) {
             bool result = sav3dsLoadSlot(slot);
@@ -501,9 +502,9 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
                 bool isDialog = false;
 
                 char title[32];
-                snprintf(title, sizeof(title), "Load Slot #%d", slot);
+                snprintf(title, sizeof(title), "读取存档位 #%d", slot);
 
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "Unable to load this save.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk());
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, "无法读取该存档", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk());
                 menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
             } else {
                 CheckAndUpdate( settings3DS.CurrentSaveSlot, slot );
@@ -513,19 +514,19 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
         }, MenuItemType::Action, slotInfo, ""_s);
     }
     if (!hasLoadRows)
-        AddMenuNote(items, "  No saves to load yet.");
+        AddMenuNote(items, "  没有可读取的存档");
     AddMenuSpacer(items);
 
-    AddMenuCheckbox(items, "  Automatically save and resume this game"_s, settings3DS.AutoSavestate,
+    AddMenuCheckbox(items, "  自动保存并返回到游戏"_s, settings3DS.AutoSavestate,
         []( int val ) { CheckAndUpdateToggle( settings3DS.AutoSavestate, val ); });
-    AddMenuNote(items, "  Saves when you quit or switch games. Uses a separate save.");
-    AddMenuCheckbox(items, "  Show save slot previews"_s, settings3DS.SaveStateScreenshots,
+    AddMenuNote(items, "  在退出或切换游戏时保存.使用独立的存档");
+    AddMenuCheckbox(items, "  展示存档位预览"_s, settings3DS.SaveStateScreenshots,
         []( int val ) { CheckAndUpdateToggle( settings3DS.SaveStateScreenshots, val ); });
 }
 
 static void openSaveLoadPage(SMenuTab& tab, std::vector<SMenuTab>& menuTabs, int& currentMenuTab) {
     tab.subPage = { SUBPAGE_SAVE_LOAD, 0, {}, tab.SelectedItemIndex, tab.FirstItemIndex };
-    tab.SubTitle.assign("Save and Load");
+    tab.SubTitle.assign("保存与读取");
     tab.SubTitleRight.clear();
     tab.SelectedItemIndex = 0;
     tab.FirstItemIndex = 0;
@@ -537,27 +538,27 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     items.clear();
 
     if (session3DS.isRomLoaded) {
-        AddMenuHeader1(items, "CURRENT GAME"_s);
+        AddMenuHeader1(items, "当前游戏"_s);
         items.emplace_back([](int val) {        
             session3DS.emulatorState = EMUSTATE_EMULATE;
-        }, MenuItemType::Action, "  Resume"_s, ""_s);
+        }, MenuItemType::Action, "  继续游戏"_s, ""_s);
 
 
         items.emplace_back([&menuTabs, &currentMenuTab](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Reset Console", "Restart the game? Unsaved progress is lost.", true, true);
+            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "重启控制台", "将会重启游戏,未保存的进度将会丢失", true, true);
 
             if (confirmed) {
                 impl3dsResetConsole();
                 session3DS.emulatorState = EMUSTATE_EMULATE;
             }
-        }, MenuItemType::Action, "  Reset"_s, ""_s);
+        }, MenuItemType::Action, "  重启"_s, ""_s);
 
-        items.emplace_back(nullptr, MenuItemType::Action, "  Save and Load", "\233",
+        items.emplace_back(nullptr, MenuItemType::Action, "  保存与读取", "\233",
                            MENU_ENTER_SUBPAGE - SUBPAGE_SAVE_LOAD);
 
-        items.emplace_back(nullptr, MenuItemType::Action, "  Online Updater", "\233",
+        items.emplace_back(nullptr, MenuItemType::Action, "  在线更新", "\233",
                            MENU_ENTER_SUBPAGE - SUBPAGE_ONLINE_UPDATER);
 
         AddMenuSpacer(items);
@@ -565,44 +566,44 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
         items.emplace_back([&menuTabs, &currentMenuTab](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "ROM Info", menu3dsGetRomInfo(), Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, menu3dsMakeOptionsForOk());
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "ROM信息", menu3dsGetRomInfo(), Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, menu3dsMakeOptionsForOk());
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
-        }, MenuItemType::Action, "  ROM Info"_s, ""_s);
+        }, MenuItemType::Action, "  ROM信息"_s, ""_s);
 
         items.emplace_back([&menuTabs, &currentMenuTab](int val) {
             SMenuTab dialogTab;
             bool isDialog = false;
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Screenshot", "Saving screenshot...", Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, std::vector<SMenuItem>(), -1, true, "", true);
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "截图", "正在保存截图...", Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, std::vector<SMenuItem>(), -1, true, "", true);
 
             char path[PATH_MAX];
 
             if (sav3dsTakeMenuScreenshot(path, sizeof(path)))
             {
                 char message[PATH_MAX];
-                const size_t maxPathLen = sizeof(message) - strlen("Screenshot saved to .") - 1;
-                snprintf(message, sizeof(message), "Screenshot saved to %.*s.", (int)maxPathLen, path);
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Screenshot", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
+                const size_t maxPathLen = sizeof(message) - strlen("截图已保存到 ") - 1;
+                snprintf(message, sizeof(message), "截图已保存到 %.*s", (int)maxPathLen, path);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "截图", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
             }
             else
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Screenshot", "Failed to save screenshot.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "截图", "保存截图失败", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
                         
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
 
-        }, MenuItemType::Action, "  Take Screenshot"_s, ""_s);
+        }, MenuItemType::Action, "  屏幕截图"_s, ""_s);
 
         AddMenuSpacer(items);
 
         appendRaSection(items, menuTabs, currentMenuTab);
     }
 
-    AddMenuHeader1(items, "APPEARANCE"_s);
+    AddMenuHeader1(items, "外观设置"_s);
 
     const char* gameThumbnailMessage =
-        "Missing covers fall back to another region if available\n"
-        "(US > PAL > Japan). Download thumbnails with Online Updater\n"
-        "or see github.com/matbo87/snes9x_3ds-assets for setup.";
+        "缺失的封面会回退到其他可用地区\n"
+        "(US > PAL > Japan); 可通过在线更新下载缩略图\n"
+        "或参见 github.com/matbo87/snes9x_3ds-assets 进行设置";
 
-    AddMenuPicker(items, "  Game Thumbnail"_s, gameThumbnailMessage, makeOptionsForGameThumbnail(), static_cast<int>(settings3DS.GameThumbnailType), DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  游戏缩略图"_s, gameThumbnailMessage, makeOptionsForGameThumbnail(), static_cast<int>(settings3DS.GameThumbnailType), DIALOG_TYPE_INFO, true,
         []( int val ) { 
             if (!CheckAndUpdate(settings3DS.GameThumbnailType, static_cast<Setting::ThumbnailMode>(val))) {
                 return;
@@ -620,17 +621,17 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     for (Setting::Theme theme : themeOrder)
         AddMenuDialogOption(themeOptions, static_cast<int>(theme), Themes[static_cast<int>(theme)].Name);
 
-    AddMenuPicker(items, "  Theme"_s, ""_s, themeOptions, static_cast<int>(settings3DS.Theme), DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  主题"_s, ""_s, themeOptions, static_cast<int>(settings3DS.Theme), DIALOG_TYPE_INFO, true,
         []( int val ) {
             if (CheckAndUpdate(settings3DS.Theme, static_cast<Setting::Theme>(val)))
                 menu3dsSetScreenDirty();
         });
 
 
-    AddMenuPicker(items, "  Font"_s, ""_s, menu3dsMakePickerOptions({"Tempesta", "Ronda"}), static_cast<int>(settings3DS.Font), DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  字体"_s, ""_s, menu3dsMakePickerOptions({"Tempesta", "Ronda"}), static_cast<int>(settings3DS.Font), DIALOG_TYPE_INFO, true,
         []( int val ) { if ( CheckAndUpdate( settings3DS.Font, static_cast<Setting::Font>(val) ) ) { ui3dsSetFont(); menu3dsMarkAllTabsDirty(); } });
 
-    AddMenuPicker(items, "  Game Screen"_s, "The screen the game is shown on. The menu uses the other one."_s, menu3dsMakePickerOptions({"Top", "Bottom"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  游戏屏幕"_s, "选择使用上屏或下屏进行游玩"_s, menu3dsMakePickerOptions({"上屏", "下屏"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
         [&menuTabs, &currentMenuTab]( int val ) { 
             if (!CheckAndUpdate(settings3DS.GameScreen, (gfxScreen_t)val)) {
                 return;
@@ -651,7 +652,7 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
 
     if (gpu3dsIs3DAvailable() && settings3DS.GameScreen == GFX_TOP && settings3DS.EnhancedResolution != Setting::EnhancedResolution::Wide) {
         AddMenuSpacer(items);
-        AddMenuCheckbox(items, "  3D Enabled"_s, !settings3DS.Disable3DSlider,
+        AddMenuCheckbox(items, "  启用3D"_s, !settings3DS.Disable3DSlider,
             []( int val ) {
                 if (!CheckAndUpdateToggle(settings3DS.Disable3DSlider, !val)) {
                     return;
@@ -664,7 +665,7 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
             });
 
         if (!settings3DS.Disable3DSlider) {
-            AddMenuPicker(items, "  3D Intensity"_s, "Adjusts the strength of the 3D effect."_s, menu3dsMakePickerOptions({"Normal", "Medium", "High"}), static_cast<int>(settings3DS.Intensity3D), DIALOG_TYPE_INFO, true,
+            AddMenuPicker(items, "  3D强度"_s, "调整立体3D效果的强度"_s, menu3dsMakePickerOptions({"常规", "中等", "高"}), static_cast<int>(settings3DS.Intensity3D), DIALOG_TYPE_INFO, true,
                 []( int val ) {
                     if (CheckAndUpdate(settings3DS.Intensity3D, static_cast<Setting::Intensity3D>(val))) {
                         GPU3DS.gameScreenBufferDesync = true;
@@ -679,9 +680,9 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     if (!session3DS.isRomLoaded)
         appendRaSection(items, menuTabs, currentMenuTab);
 
-    AddMenuHeader1(items, "OTHER"_s);
+    AddMenuHeader1(items, "其它"_s);
 
-    AddMenuCheckbox(items, "  Enable Debug Log"_s, settings3DS.LogFileEnabled,
+    AddMenuCheckbox(items, "  启用调试日志"_s, settings3DS.LogFileEnabled,
         []( int val ) {
             if (!CheckAndUpdateToggle(settings3DS.LogFileEnabled, val) || !settings3DS.LogFileEnabled)
                 return;
@@ -690,24 +691,24 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
             if (session3DS.isRomLoaded)
                 log3dsWrite("Logging enabled, ROM: %s", Memory.ROMFilename);
         });
-    std::string logfileInfo = "  Keep off unless reporting a bug. Saved to /3ds/snes9x_3ds and replaced on every start. Restart to log startup.";
+    std::string logfileInfo = "  调试问题时才用,否则应保持关闭.在 \"3ds/snes9x_3ds\" 目录创建日志文件,需要重启";
     AddMenuNote(items, logfileInfo);
     AddMenuSpacer(items);
 
     if (!session3DS.isRomLoaded)
-        items.emplace_back(nullptr, MenuItemType::Action, "  Online Updater", "\233",
+        items.emplace_back(nullptr, MenuItemType::Action, "  在线更新", "\233",
                            MENU_ENTER_SUBPAGE - SUBPAGE_ONLINE_UPDATER);
 
     if (cfgFileAvailable[0] || cfgFileAvailable[1]) {
         items.emplace_back([&menuTabs, &currentMenuTab](int val) {
             const char *resetConfigDescription =
-                !cfgFileAvailable[1] ? "Reset the global config to defaults." :
-                !cfgFileAvailable[0] ? "Reset this game's config to defaults." :
-                "Reset the global config, this game's config, or both to defaults.";
+                !cfgFileAvailable[1] ? "全局设置恢复默认" :
+                !cfgFileAvailable[0] ? "当前游戏设置恢复默认" :
+                "重置全局设置、单一游戏设置或以上两者";
 
             SMenuTab dialogTab;
             bool isDialog = false;
-            int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Reset Config"_s, resetConfigDescription, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, makeOptionsForResetConfig());
+            int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "初始化设置"_s, resetConfigDescription, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, makeOptionsForResetConfig());
             
             // "Cancel" selected or B pressed
             if (option <= 0) {
@@ -740,25 +741,25 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
             settings3dsUpdate(resetGame);
 
             menu3dsMarkAllTabsDirty();
-        }, MenuItemType::Action, "  Reset Config",  "\215");
+        }, MenuItemType::Action, "  初始化设置",  "\215");
     }
 
     items.emplace_back([&menuTabs, &currentMenuTab](int val) {
         SMenuTab dialogTab;
         bool isDialog = false;
-        if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Exit Emulator"_s, "Exit now? Your settings will be saved."_s, true, false)) {
+        if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "退出模拟器"_s, "现在退出?设置将会被保存"_s, true, false)) {
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
             return;
         }
 
-        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Exit Emulator"_s, "Exiting..."_s,
+        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "退出模拟器"_s, "正在退出..."_s,
             Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, std::vector<SMenuItem>(), -1, false);
 
         session3DS.emulatorState = EMUSTATE_END;
-    }, MenuItemType::Action, "  Exit Emulator", "");
+    }, MenuItemType::Action, "  退出模拟器", "");
 
     AddMenuSpacer(items);
-    std::string info = std::string(settings3dsGetAppVersion("  Snes9x for 3DS v")) + " \267 github.com/matbo87/snes9x_3ds";
+    std::string info = std::string(settings3dsGetAppVersion("  Snes9x for 3DS v")) + " \267 github.com/R-YaTian/snes9x_3ds";
     AddMenuNote(items, info);
 }
 
@@ -767,10 +768,10 @@ const std::vector<SMenuItem>& makeOptionsForOnScreenDisplay() {
 
     if (items.empty()) {
         items.reserve(4);
-        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::None), "Off"_s,                       ""_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::Default), "Default"_s,                "Same image for every game"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::Adaptive), "Game or default"_s,       "Default if no game image"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::CustomOnly), "Game only"_s,           "Hidden if no game image"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::None), "无"_s,                       ""_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::Default), "默认"_s,                "所有游戏使用相同图片"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::Adaptive), "游戏或默认"_s,       "找不到游戏相应图片时回退到默认图片"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::AssetMode::CustomOnly), "仅游戏"_s,           "找不到游戏相应图片时隐藏"_s);
     }
     
     return items;
@@ -780,14 +781,14 @@ std::vector<SMenuItem> makeOptionsForStretch() {
     std::vector<SMenuItem> items;
     items.reserve(6);
 
-    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::None), "No Stretch"_s,                   "Pixel Perfect (256x224)"_s);
-    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Aspect_4_3), "4:3 Aspect"_s,             "Width only (298x224)"_s);
-    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::CrtAspect), "CRT Aspect"_s,              "Width only (292x224)"_s);
-    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Fit_4_3), "4:3 Fit"_s,                   "Full height (320x240)"_s);
-    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Fit_8_7), "8:7 Fit"_s,                   "Full height (274x240)"_s);
+    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::None), "不拉伸"_s,                   "完美点对点(256x224)"_s);
+    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Aspect_4_3), "4:3风格"_s,             "仅拉伸宽度(298x224)"_s);
+    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::CrtAspect), "CRT风格"_s,              "仅拉伸宽度(292x224)"_s);
+    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Fit_4_3), "适配4:3"_s,                   "拉伸到320x240"_s);
+    AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Fit_8_7), "适配8:7"_s,                   "拉伸到274x240"_s);
 
     if (settings3DS.GameScreen == GFX_TOP) {
-        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Full), "Fullscreen"_s,               "Fills the screen (400x240)");
+        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenStretch::Full), "全屏幕"_s,               "拉伸到400x240");
     }
 
     return items;
@@ -799,12 +800,12 @@ std::vector<SMenuItem> makeOptionsForEnhancedResolution() {
 
     // "2x Screen" (wide 800px panel) only exists on a wide-capable device's top screen.
     if (gpu3dsIsWideAvailable() && settings3DS.GameScreen == GFX_TOP) {
-        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Off),        "Off"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Standard),   "Standard"_s,   "Slightly sharper, keeps 3D"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Wide), "2x Screen"_s,  "Most detail, disables 3D"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Off),        "关"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Standard),   "标准"_s,   "效果较锐利"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Wide), "2x分辨率"_s,  "更注重细节但禁用3D"_s);
     } else {
-        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Off),      "Off"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Standard), "On"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Off),      "关"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::EnhancedResolution::Standard), "开"_s);
     }
 
     return items;
@@ -818,14 +819,14 @@ const std::vector<SMenuItem>& makeOptionsForButtonMapping() {
         items.reserve(9);
         
         AddMenuDialogOption(items, 0,                      "-"_s);
-        AddMenuDialogOption(items, SNES_A_MASK,            "SNES A Button"_s);
-        AddMenuDialogOption(items, SNES_B_MASK,            "SNES B Button"_s);
-        AddMenuDialogOption(items, SNES_X_MASK,            "SNES X Button"_s);
-        AddMenuDialogOption(items, SNES_Y_MASK,            "SNES Y Button"_s);
-        AddMenuDialogOption(items, SNES_TL_MASK,           "SNES L Button"_s);
-        AddMenuDialogOption(items, SNES_TR_MASK,           "SNES R Button"_s);
-        AddMenuDialogOption(items, SNES_SELECT_MASK,       "SNES SELECT Button"_s);
-        AddMenuDialogOption(items, SNES_START_MASK,        "SNES START Button"_s);
+        AddMenuDialogOption(items, SNES_A_MASK,            "SNES A键"_s);
+        AddMenuDialogOption(items, SNES_B_MASK,            "SNES B键"_s);
+        AddMenuDialogOption(items, SNES_X_MASK,            "SNES X键"_s);
+        AddMenuDialogOption(items, SNES_Y_MASK,            "SNES Y键"_s);
+        AddMenuDialogOption(items, SNES_TL_MASK,           "SNES L键"_s);
+        AddMenuDialogOption(items, SNES_TR_MASK,           "SNES R键"_s);
+        AddMenuDialogOption(items, SNES_SELECT_MASK,       "SNES SELECT键"_s);
+        AddMenuDialogOption(items, SNES_START_MASK,        "SNES START键"_s);
     }
     
     return items;
@@ -838,30 +839,30 @@ std::vector<SMenuItem> makeOptionsFor3DSButtonMapping() {
     AddMenuDialogOption(items, 0,                                   "-"_s);
     
 	if(device3DS.isNew3DS) {        
-        AddMenuDialogOption(items, static_cast<int>(KEY_ZL),            "ZL Button"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_ZR),            "ZR Button"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_ZL),            "ZL键"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_ZR),            "ZR键"_s);
     }
 
     if ((!settings3DS.UseGlobalButtonMappings && !settings3DS.BindCirclePad) || (settings3DS.UseGlobalButtonMappings && !settings3DS.GlobalBindCirclePad)) {
-        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_UP),            "Circle Pad Up"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_DOWN),            "Circle Pad Down"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_LEFT),            "Circle Pad Left"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_RIGHT),            "Circle Pad Right"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_UP),            "滑控钮上"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_DOWN),            "滑控钮下"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_LEFT),            "滑控钮左"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CPAD_RIGHT),            "滑控钮右"_s);
     }
 
 	if(device3DS.isNew3DS) {
-        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_UP),            "C-stick Up"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_DOWN),            "C-stick Down"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_LEFT),            "C-stick Left"_s);
-        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_RIGHT),            "C-stick Right"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_UP),            "C摇杆上"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_DOWN),            "C摇杆下"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_LEFT),            "C摇杆左"_s);
+        AddMenuDialogOption(items, static_cast<int>(KEY_CSTICK_RIGHT),            "C摇杆右"_s);
     }
 
-    AddMenuDialogOption(items, static_cast<int>(KEY_A),             "3DS A Button"_s);
-    AddMenuDialogOption(items, static_cast<int>(KEY_B),             "3DS B Button"_s);
-    AddMenuDialogOption(items, static_cast<int>(KEY_X),             "3DS X Button"_s);
-    AddMenuDialogOption(items, static_cast<int>(KEY_Y),             "3DS Y Button"_s);
-    AddMenuDialogOption(items, static_cast<int>(KEY_L),             "3DS L Button"_s);
-    AddMenuDialogOption(items, static_cast<int>(KEY_R),             "3DS R Button"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_A),             "3DS A键"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_B),             "3DS B键"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_X),             "3DS X键"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_Y),             "3DS Y键"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_L),             "3DS L键"_s);
+    AddMenuDialogOption(items, static_cast<int>(KEY_R),             "3DS R键"_s);
 
     return items;
 }
@@ -870,8 +871,8 @@ const std::vector<SMenuItem>& makeOptionsForFrameRate() {
     static std::vector<SMenuItem> items;
     if (items.empty()) {
         items.reserve(2);
-        AddMenuDialogOption(items, static_cast<int>(Setting::Framerate::UseRomRegion), "50 FPS"_s, "Game default"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::Framerate::ForceFps60),   "60 FPS"_s, "Faster"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::Framerate::UseRomRegion), "50 FPS"_s, "游戏默认配置"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::Framerate::ForceFps60),   "60 FPS"_s, "游戏速度更快"_s);
     }
     return items;
 }
@@ -880,9 +881,9 @@ const std::vector<SMenuItem>& makeOptionsForInFramePaletteChanges() {
     static std::vector<SMenuItem> items;
     if (items.empty()) {
         items.reserve(3);
-        AddMenuDialogOption(items, 1, "Enabled"_s,                  "Accurate, slower"_s);
-        AddMenuDialogOption(items, 2, "Disabled (start palette)"_s, "Faster"_s);
-        AddMenuDialogOption(items, 3, "Disabled (end palette)"_s,   "Faster"_s);
+        AddMenuDialogOption(items, 1, "启用"_s,                  "最好(但较慢)"_s);
+        AddMenuDialogOption(items, 2, "禁用(起始调色板)"_s, "比启用更快"_s);
+        AddMenuDialogOption(items, 3, "禁用(末尾调色板)"_s,   "比启用更快"_s);
     }
     return items;
 }
@@ -891,9 +892,9 @@ const std::vector<SMenuItem>& makeOptionsForScreenFilter() {
     static std::vector<SMenuItem> items;
     if (items.empty()) {
         items.reserve(3);
-        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Sharp), "Sharp"_s, "Crisp pixels"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Smooth), "Smooth"_s, "Soft edges"_s);
-        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Balanced), "Balanced"_s, "Crisp + soft blend"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Sharp), "犀利"_s, "清晰像素"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Smooth), "平滑"_s, "柔化边缘"_s);
+        AddMenuDialogOption(items, static_cast<int>(Setting::ScreenFilter::Balanced), "平衡"_s, "清晰+柔化混合"_s);
     }
     return items;
 }
@@ -901,9 +902,9 @@ const std::vector<SMenuItem>& makeOptionsForScreenFilter() {
 void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTabs, int& currentMenuTab) {
     items.clear();
 
-    AddMenuHeader1(items, "GENERAL SETTINGS"_s);
-    AddMenuHeader2(items, "Video"_s);
-    AddMenuPicker(items, "  Scaling"_s, "Sets how the picture fills the screen.\nStretched modes look sharper with Enhanced Resolution."_s, makeOptionsForStretch(), static_cast<int>(settings3DS.ScreenStretch), DIALOG_TYPE_INFO, true,
+    AddMenuHeader1(items, "全局设置"_s);
+    AddMenuHeader2(items, "视频"_s);
+    AddMenuPicker(items, "  缩放"_s, "设置画面如何填充屏幕\n拉伸模式在启用增强分辨率时看起来更清晰"_s, makeOptionsForStretch(), static_cast<int>(settings3DS.ScreenStretch), DIALOG_TYPE_INFO, true,
                   []( int val ) { 
                     bool wasNone = settings3DS.ScreenStretch == Setting::ScreenStretch::None;
                     if (CheckAndUpdate( settings3DS.ScreenStretch, static_cast<Setting::ScreenStretch>(val) )) { 
@@ -913,8 +914,8 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                             menu3dsMarkTabDirty(TAB_SETTINGS);
                     } 
                 });
-    
-    AddMenuPicker(items, "  Scale Filter"_s, "Only affects scaled modes. Sharp can make some pixels look larger than others. Balanced may reduce performance slightly."_s,
+
+    AddMenuPicker(items, "  缩放滤镜"_s, "仅影响缩放模式. \"犀利\"可能使某些像素看起来更大,\n\"平衡\"可能略微降低性能"_s,
         makeOptionsForScreenFilter(), static_cast<int>(settings3DS.ScreenFilter), DIALOG_TYPE_INFO, true,
         []( int val ) {
             if (CheckAndUpdate(settings3DS.ScreenFilter, static_cast<Setting::ScreenFilter>(val))) {
@@ -932,10 +933,10 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
     if (!wideOptionAvailable && settings3DS.EnhancedResolution == Setting::EnhancedResolution::Wide)
         enhancedResolutionValue = static_cast<int>(Setting::EnhancedResolution::Standard);
 
-    AddMenuPicker(items, "  Enhanced Resolution"_s,
+    AddMenuPicker(items, "  增强分辨率"_s,
         wideOptionAvailable
-            ? "Sharpens the picture with stretched Scaling modes.\n2x Screen may reduce performance."_s
-            : "Sharpens the picture slightly with stretched Scaling modes.\nLittle effect with No Stretch."_s,
+            ? "在拉伸缩放模式下锐化画面\n2x分辨率可能会降低性能"_s
+            : "在拉伸缩放模式下略微锐化画面\n在不拉伸时效果不明显"_s,
         makeOptionsForEnhancedResolution(), enhancedResolutionValue, DIALOG_TYPE_INFO, true,
         []( int val ) {
             if (CheckAndUpdate( settings3DS.EnhancedResolution, static_cast<Setting::EnhancedResolution>(val) )) {
@@ -948,7 +949,7 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
 
     AddMenuSpacer(items);
 
-    AddMenuCheckbox(items, "  Crop & Overscan"_s, settings3DS.CropEnabled,
+    AddMenuCheckbox(items, "  裁剪与过扫描"_s, settings3DS.CropEnabled,
         []( int val ) {
             bool wasShown = settings3DS.CropEnabled;
             if (CheckAndUpdateToggle(settings3DS.CropEnabled, val)) {
@@ -969,11 +970,11 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
         });
 
     if (settings3DS.CropEnabled) {
-        AddMenuGauge(items, "  Crop Top Scanlines"_s, 0, 32, settings3DS.CropTop,
+        AddMenuGauge(items, "  裁剪顶部扫描线"_s, 0, 32, settings3DS.CropTop,
                         []( int val ) { if (CheckAndUpdate(settings3DS.CropTop, val)) menu3dsSetScreenDirty(); }, true);
-        AddMenuGauge(items, "  Crop Bottom Scanlines"_s, 0, 32, settings3DS.CropBottom,
+        AddMenuGauge(items, "  裁剪底部扫描线"_s, 0, 32, settings3DS.CropBottom,
                         []( int val ) { if (CheckAndUpdate(settings3DS.CropBottom, val)) menu3dsSetScreenDirty(); }, true);
-        AddMenuCheckbox(items, "  Overscan (zoom to fit height)"_s, settings3DS.Overscan,
+        AddMenuCheckbox(items, "  过扫描 (根据高度缩放)"_s, settings3DS.Overscan,
             []( int val ) {
                 if (CheckAndUpdateToggle(settings3DS.Overscan, val)) {
                     menu3dsSetScreenDirty();
@@ -985,9 +986,9 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
 
         
     AddMenuSpacer(items);
-    AddMenuHeader2(items, "On-Screen Display"_s);
+    AddMenuHeader2(items, "OSD设置"_s);
 
-    AddMenuPicker(items, "  Game Screen Overlay"_s, "Shows an image over the game, such as a bezel.\nSee github.com/matbo87/snes9x_3ds-assets for setup."_s,
+    AddMenuPicker(items, "  游戏画面叠加层"_s, "在游戏画面上显示图像,例如边框\n请参阅 github.com/matbo87/snes9x_3ds-assets 进行设置"_s,
         makeOptionsForOnScreenDisplay(), static_cast<int>(settings3DS.GameOverlay), DIALOG_TYPE_INFO, true,
                   []( int val ) {
                     bool wasShown = settings3DS.GameOverlay != Setting::AssetMode::None;
@@ -1003,13 +1004,13 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
             );
 
     if (settings3DS.GameOverlay != Setting::AssetMode::None) {
-        AddMenuCheckbox(items, "  Auto-Fit Bezel (follows Video \273 Scaling)", settings3DS.GameOverlayAutoFit,
+        AddMenuCheckbox(items, "  自适应边框 (跟随视频 \273 缩放)", settings3DS.GameOverlayAutoFit,
             []( int val ) { if (CheckAndUpdateToggle( settings3DS.GameOverlayAutoFit, val )) menu3dsSetScreenDirty(); });
     }
 
 
 
-    AddMenuPicker(items, "  Game Screen BG"_s, "Shows a background behind the game.\nSee github.com/matbo87/snes9x_3ds-assets for setup."_s,
+    AddMenuPicker(items, "  游戏画面背景"_s, "在游戏画面后显示背景\n请参阅 github.com/matbo87/snes9x_3ds-assets 进行设置"_s,
         makeOptionsForOnScreenDisplay(), static_cast<int>(settings3DS.GameScreenBg), DIALOG_TYPE_INFO, true,
                     []( int val ) {
                         bool wasShown = settings3DS.GameScreenBg != Setting::AssetMode::None;
@@ -1025,11 +1026,11 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                 );
 
     if (settings3DS.GameScreenBg != Setting::AssetMode::None) {
-        AddMenuGauge(items, "  Game Screen BG Opacity"_s, 1, OPACITY_STEPS, settings3DS.GameScreenBgOpacity,
+        AddMenuGauge(items, "  游戏画面背景不透明度"_s, 1, OPACITY_STEPS, settings3DS.GameScreenBgOpacity,
                         []( int val ) { if (CheckAndUpdate( settings3DS.GameScreenBgOpacity, val )) menu3dsSetScreenDirty(); });
     }
 
-    AddMenuPicker(items, "  Second Screen BG"_s, "Shows a background on the second screen.\nSee github.com/matbo87/snes9x_3ds-assets for setup."_s,
+    AddMenuPicker(items, "  副屏幕背景"_s, "在副屏幕上显示背景\n请参阅 github.com/matbo87/snes9x_3ds-assets 进行设置"_s,
         makeOptionsForOnScreenDisplay(), static_cast<int>(settings3DS.SecondScreenBg), DIALOG_TYPE_INFO, true,
                     []( int val ) {
                         bool wasShown = settings3DS.SecondScreenBg != Setting::AssetMode::None;
@@ -1043,13 +1044,13 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                 );
 
     if (settings3DS.SecondScreenBg != Setting::AssetMode::None) {
-        AddMenuGauge(items, "  Second Screen BG Opacity"_s, 1, OPACITY_STEPS, settings3DS.SecondScreenBgOpacity,
+        AddMenuGauge(items, "  副屏幕背景不透明度"_s, 1, OPACITY_STEPS, settings3DS.SecondScreenBgOpacity,
                         []( int val ) { CheckAndUpdate( settings3DS.SecondScreenBgOpacity, val ); });
     }
 
     AddMenuSpacer(items);
 
-    AddMenuGauge(items, "  Scanlines"_s, 0, SCANLINE_INTENSITY_MAX, settings3DS.ScanlineIntensity,
+    AddMenuGauge(items, "  扫描线"_s, 0, SCANLINE_INTENSITY_MAX, settings3DS.ScanlineIntensity,
         []( int val ) {
             if (CheckAndUpdate(settings3DS.ScanlineIntensity, val)) {
                 img3dsUpdateScanlineTexture();
@@ -1057,31 +1058,31 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
             }
         });
 
-    AddMenuCheckbox(items, "  Show FPS", settings3DS.ShowFPS,
+    AddMenuCheckbox(items, "  显示FPS", settings3DS.ShowFPS,
         []( int val ) { CheckAndUpdateToggle( settings3DS.ShowFPS, val ); });
 
     AddMenuSpacer(items);
 
-    AddMenuHeader1(items, "GAME-SPECIFIC SETTINGS"_s);
-    AddMenuHeader2(items, "Video"_s);
-    AddMenuPicker(items, "  Frameskip"_s, "Skips drawing frames when the game runs slow. Higher values help maintain game speed but make motion less smooth."_s,
-        menu3dsMakePickerOptions({"Off", "Up to 1 frame", "Up to 2 frames", "Up to 3 frames", "Up to 4 frames"}), settings3DS.MaxFrameSkips, DIALOG_TYPE_INFO, true,
+    AddMenuHeader1(items, "单一游戏设置"_s);
+    AddMenuHeader2(items, "视频"_s);
+    AddMenuPicker(items, "  跳帧"_s, "跳帧可以加快游戏速度,但可能会导致画面不平滑"_s,
+        menu3dsMakePickerOptions({"关闭", "开启 (最高1帧)", "开启 (最高2帧)", "开启 (最高3帧)", "开启 (最高4帧)"}), settings3DS.MaxFrameSkips, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.MaxFrameSkips, val ); });
     
     if (Settings.PAL)
-        AddMenuPicker(items, "  Framerate"_s, ""_s, makeOptionsForFrameRate(), static_cast<int>(settings3DS.Framerate), DIALOG_TYPE_INFO, true,
+        AddMenuPicker(items, "  帧率"_s, ""_s, makeOptionsForFrameRate(), static_cast<int>(settings3DS.Framerate), DIALOG_TYPE_INFO, true,
                       []( int val ) { CheckAndUpdate( settings3DS.Framerate, static_cast<Setting::Framerate>(val) ); });
-    AddMenuPicker(items, "  In-Frame Palette Changes"_s, "Handles color changes in the middle of a frame.\nThe Disabled options are faster but can show wrong colors."_s, makeOptionsForInFramePaletteChanges(), settings3DS.PaletteFix, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  帧间调色板变换"_s, "在帧间处理颜色变换\n禁用该选项性能更好但可能显示错误的颜色"_s, makeOptionsForInFramePaletteChanges(), settings3DS.PaletteFix, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.PaletteFix, val ); });
 
-    AddMenuCheckbox(items, "  Mode 7 Smoothing"_s, settings3DS.Mode7BilinearFilter,
+    AddMenuCheckbox(items, "  Mode 7 平滑处理"_s, settings3DS.Mode7BilinearFilter,
         []( int val ) { CheckAndUpdateToggle( settings3DS.Mode7BilinearFilter, val ); });
     items.back().Dimmed = !IPPU.Mode7Prepared;
 
     AddMenuSpacer(items);
 
-    AddMenuHeader2(items, "Audio"_s);
-    AddMenuCheckbox(items, "  Apply volume to all games"_s, settings3DS.UseGlobalVolume,
+    AddMenuHeader2(items, "音频"_s);
+    AddMenuCheckbox(items, "  将音量设置应用于所有游戏"_s, settings3DS.UseGlobalVolume,
                 []( int val )
                 {
                     CheckAndUpdateToggle( settings3DS.UseGlobalVolume, val );
@@ -1090,7 +1091,7 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                     else
                         settings3DS.Volume = settings3DS.GlobalVolume;
                 });
-    AddMenuPicker(items, "  Volume Amplification", "100% is the original volume.\nHigher values boost sound but may cause distortion.", menu3dsMakePickerOptions({"100%", "125%", "150%", "175%", "200%"}),
+    AddMenuPicker(items, "  音量扩增", "100% = 不扩增\n较高的值将影响某些游戏的音频质量", menu3dsMakePickerOptions({"100%", "125%", "150%", "175%", "200%"}),
                 settings3DS.UseGlobalVolume ? settings3DS.GlobalVolume : settings3DS.Volume, DIALOG_TYPE_INFO, true,
                 []( int val ) {
                     if (settings3DS.UseGlobalVolume)
@@ -1099,12 +1100,12 @@ void makeOptionMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menuTa
                         CheckAndUpdate( settings3DS.Volume, val );
                 });
 
-    AddMenuPicker(items, "  Audio Buffer"_s, "Increase this only if the sound crackles.\nHigher values add a slight sound delay."_s, menu3dsMakePickerOptions({"Low", "Normal", "High"}), settings3DS.AudioBuffer, DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  音频缓冲"_s, "仅在爆音时增大该值\n较高的值会使得音频延迟增加"_s, menu3dsMakePickerOptions({"低", "常规", "高"}), settings3DS.AudioBuffer, DIALOG_TYPE_INFO, true,
                   []( int val ) { CheckAndUpdate( settings3DS.AudioBuffer, val ); });
 
     AddMenuSpacer(items);
 
-    items.emplace_back(nullptr, MenuItemType::Action, "  Advanced Settings", "\233",
+    items.emplace_back(nullptr, MenuItemType::Action, "  高级设置", "\233",
                        MENU_ENTER_SUBPAGE - SUBPAGE_ADVANCED_SETTINGS);
 };
 
@@ -1116,8 +1117,8 @@ static void makeAdvancedSettingsItems(std::vector<SMenuItem>& items) {
     // Only meaningful while In-Frame Palette Changes is Enabled (the deferral path).
     if (settings3DS.PaletteFix == 1)
     {
-        AddMenuHeader2(items, "Reduce Layer Draws on Palette Changes"_s);
-        AddMenuNote(items, "  Can increase FPS in games with heavy mid-frame color changes, like Top Gear. Uncheck any layer that glitches.");
+        AddMenuHeader2(items, "在调色板变换时减少图层绘制"_s);
+        AddMenuNote(items, "  在帧间颜色变换频繁的游戏(如\"超越颠峰\")中可以\n提高帧率,若某些图层渲染异常请取消勾选");
 
         static const char *deferBgNames[3] = { "  BG1", "  BG2", "  BG3" };
         for (int bg = LAYER_BG0; bg <= LAYER_BG2; bg++) {
@@ -1134,14 +1135,14 @@ static void makeAdvancedSettingsItems(std::vector<SMenuItem>& items) {
         AddMenuSpacer(items);
     }
 
-    AddMenuHeader2(items, "Enable / Disable Layers");
-    AddMenuNote(items, "  Not saved. Resets when you load another game.");
+    AddMenuHeader2(items, "启用 / 禁用 图层");
+    AddMenuNote(items, "  不保存,加载其他游戏时重置");
     if (IPPU.Mode7Prepared)
         AddMenuNote(items, IPPU.Mode7EXTBGFlag
-            ? "  Mode 7 EXTBG on screen. BG1 and BG2 share one plane."
-            : "  Mode 7 on screen, drawn as BG1.");
+            ? "  Mode 7 EXTBG 已启用, BG1 和 BG2 共享一个平面"
+            : "  Mode 7 已启用, 绘制为 BG1");
 
-    static const char *layerNames[LAYER_BRIGHTNESS + 1] = { "  BG1", "  BG2", "  BG3", "  BG4", "  Sprites", "  Backdrop", "  Color Math", "  Brightness" };
+    static const char *layerNames[LAYER_BRIGHTNESS + 1] = { "  BG1", "  BG2", "  BG3", "  BG4", "  精灵", "  Backdrop", "  Color Math", "  Brightness" };
     for (int layer = LAYER_BG0; layer <= LAYER_BRIGHTNESS; layer++) {
         AddMenuCheckbox(items, layerNames[layer], settings3DS.LayerEnabled[layer],
             [layer]( int val ) {
@@ -1151,14 +1152,14 @@ static void makeAdvancedSettingsItems(std::vector<SMenuItem>& items) {
         items.back().Dimmed = !GPU3DSExt.layerList.layers[layer].sectionsTotal;
     }
     AddMenuSpacer(items);
-    AddMenuCheckbox(items, "  Skip vertex build for disabled layers", settings3DS.LayerSkipVertexBuild,
+    AddMenuCheckbox(items, "  对已禁用的图层跳过顶点构建", settings3DS.LayerSkipVertexBuild,
         []( int val ) { CheckAndUpdateToggle( settings3DS.LayerSkipVertexBuild, val ); });
-    AddMenuNote(items, "  Performance setting. Re-enabled layers are drawn on resume.");
+    AddMenuNote(items, "  性能相关设置,重新启用的图层将在返回游戏时绘制");
 }
 
 static void openAdvancedSettingsPage(SMenuTab& tab) {
     tab.subPage = { SUBPAGE_ADVANCED_SETTINGS, 0, {}, tab.SelectedItemIndex, tab.FirstItemIndex };
-    tab.SubTitle.assign("Advanced Settings");
+    tab.SubTitle.assign("高级设置");
     tab.SubTitleRight.clear();
     tab.SelectedItemIndex = 0;
     tab.FirstItemIndex = 0;
@@ -1170,21 +1171,21 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     items.clear();
 
     const char *t3dsButtonNames[10];
-    t3dsButtonNames[BTN3DS_A] = "3DS A Button";
-    t3dsButtonNames[BTN3DS_B] = "3DS B Button";
-    t3dsButtonNames[BTN3DS_X] = "3DS X Button";
-    t3dsButtonNames[BTN3DS_Y] = "3DS Y Button";
-    t3dsButtonNames[BTN3DS_L] = "3DS L Button";
-    t3dsButtonNames[BTN3DS_R] = "3DS R Button";
-    t3dsButtonNames[BTN3DS_ZL] = "3DS ZL Button";
-    t3dsButtonNames[BTN3DS_ZR] = "3DS ZR Button";
-    t3dsButtonNames[BTN3DS_SELECT] = "3DS SELECT Button";
-    t3dsButtonNames[BTN3DS_START] = "3DS START Button";
+    t3dsButtonNames[BTN3DS_A] = "3DS A键";
+    t3dsButtonNames[BTN3DS_B] = "3DS B键";
+    t3dsButtonNames[BTN3DS_X] = "3DS X键";
+    t3dsButtonNames[BTN3DS_Y] = "3DS Y键";
+    t3dsButtonNames[BTN3DS_L] = "3DS L键";
+    t3dsButtonNames[BTN3DS_R] = "3DS R键";
+    t3dsButtonNames[BTN3DS_ZL] = "3DS ZL键";
+    t3dsButtonNames[BTN3DS_ZR] = "3DS ZR键";
+    t3dsButtonNames[BTN3DS_SELECT] = "3DS SELECT键";
+    t3dsButtonNames[BTN3DS_START] = "3DS START键";
 
-    AddMenuHeader1(items, "HOTKEYS"_s);
+    AddMenuHeader1(items, "热键设置"_s);
 
 
-    AddMenuCheckbox(items, "  Apply hotkey mappings to all games"_s, settings3DS.UseGlobalEmuControlKeys,
+    AddMenuCheckbox(items, "  为所有游戏应用热键设置"_s, settings3DS.UseGlobalEmuControlKeys,
                 []( int val )
                 {
                     CheckAndUpdateToggle( settings3DS.UseGlobalEmuControlKeys, val );
@@ -1215,8 +1216,8 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
 
     AddMenuSpacer(items);
 
-    AddMenuHeader1(items, "BUTTON CONFIGURATION"_s);
-    AddMenuCheckbox(items, "  Apply button mappings to all games"_s, settings3DS.UseGlobalButtonMappings,
+    AddMenuHeader1(items, "按键设置"_s);
+    AddMenuCheckbox(items, "  为所有游戏应用按键映射"_s, settings3DS.UseGlobalButtonMappings,
                 []( int val )
                 {
                     CheckAndUpdateToggle( settings3DS.UseGlobalButtonMappings, val );
@@ -1235,7 +1236,7 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
                     }
 
                 });
-    AddMenuCheckbox(items, "  Apply rapid-fire settings to all games"_s, settings3DS.UseGlobalTurbo,
+    AddMenuCheckbox(items, "  为所有游戏应用连发设置"_s, settings3DS.UseGlobalTurbo,
                 []( int val )
                 {
                     CheckAndUpdateToggle( settings3DS.UseGlobalTurbo, val );
@@ -1251,8 +1252,8 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
     
     
     AddMenuSpacer(items);
-    AddMenuHeader2(items, "Analog to Digital Type"_s);
-    AddMenuCheckbox(items, "  Bind Circle Pad to D-Pad"_s, settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad,
+    AddMenuHeader2(items, "滑控钮映射"_s);
+    AddMenuCheckbox(items, "  滑控钮绑定到十字键"_s, settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad,
                   []( int val ) {
                     if (CheckAndUpdateToggle(settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalBindCirclePad : settings3DS.BindCirclePad, val)) {
                         // reset hotkeys that conflict with the new circle pad binding;
@@ -1262,8 +1263,8 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
                         menu3dsMarkTabDirty(TAB_CONTROLS);
                     }
                 });
-    AddMenuNote(items, "  When disabled, the Circle Pad can be used for hotkeys.");
-                
+    AddMenuNote(items, "  当禁用时,滑控钮可用于热键");
+
     for (size_t i = 0; i < 10; ++i) {
         // skip option for ZL and ZR button when device is O3DS/O2DS
         if ((i == BTN3DS_ZL || i == BTN3DS_ZR) && !device3DS.isNew3DS) {
@@ -1275,11 +1276,11 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
         AddMenuHeader2(items, optionButtonName);
 
         std::string mappingDescription =
-            "Choose the SNES button that the " + optionButtonName +
-            " presses.\nAll assigned buttons are pressed together.";
+            "选择\"" + optionButtonName +
+            "\"对应的SNES按键\n所有已分配的按键将同时按下";
 
         for (size_t j = 0; j < 3; ++j) {
-            AddMenuPicker( items, "  Maps to"_s, mappingDescription, makeOptionsForButtonMapping(),
+            AddMenuPicker( items, "  映射到"_s, mappingDescription, makeOptionsForButtonMapping(),
                 settings3DS.UseGlobalButtonMappings ? settings3DS.GlobalButtonMapping[i][j] : settings3DS.ButtonMapping[i][j],
                 DIALOG_TYPE_INFO, true,
                 [i, j]( int val ) {
@@ -1292,7 +1293,7 @@ void makeControlsMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
         }
 
         if (i < 8)
-            AddMenuGauge(items, "  Rapid-Fire Speed"_s, 0, 8, 
+            AddMenuGauge(items, "  连发速度"_s, 0, 8, 
                 settings3DS.UseGlobalTurbo ? settings3DS.GlobalTurbo[i] : settings3DS.Turbo[i],
                 [i]( int val )
                 {
@@ -1340,11 +1341,11 @@ void makeCheatMenu(SMenuTab& tab)
 
         static char message[PATH_MAX];
         snprintf(message, sizeof(message),
-            "No cheats found for this game. To download cheats, go to\n"
-            "Emulator \273 Online Updater \273 Cheats.\n\n"
-            "To add your own codes, place \"%s.chx\" in "
-            "%s on your SD card.\n\n"
-            "See %s for the format.",
+            "未发现此游戏的金手指.要下载金手指,请前往\n"
+            "模拟器 \273 在线更新 \273 金手指\n\n"
+            "要自行添加代码,将 \"%s.chx\" 文件放置于SD卡的 "
+            "%s 文件夹\n\n"
+            "查看 %s 以确认代码格式",
             romName,
             "/3ds/snes9x_3ds/cheats",
             "github.com/matbo87/snes9x_3ds-assets");
@@ -1885,7 +1886,7 @@ void updateFileMenuTab(const char *selectedItemName, bool showCachingIndicator, 
     if (reloadFiles)
         file3dsGetFiles(entries, menuTabs, showCachingIndicator);
     fileMenuTab.SubTitleRight = file3dsIsCurrentDirLoadedFromCache()
-        ? std::string(1, UI_ICON_CHECKMARK) + " Cached"
+        ? std::string(1, UI_ICON_CHECKMARK) + " 已缓存"
         : std::string();
     fileMenuTab.SelectedItemIndex = fillFileMenuEntries(fileMenuTab.MenuItems, selectedItemName);
     if (firstItemIndex >= 0) {
@@ -1928,8 +1929,8 @@ void setupMenu(int& currentMenuTab) {
         menuTabs.resize(requiredTabs);
     }
 
-    const char* tabsStart[] = { "Emulator", "Games" };
-    const char* tabsGame[] = { "Emulator", "Settings", "Controls", "Cheats", "Games" };
+    const char* tabsStart[] = { "模拟器", "加载游戏" };
+    const char* tabsGame[] = { "模拟器", "设置", "控制配置", "金手指", "加载游戏" };
     const char** tabs = session3DS.isRomLoaded ? tabsGame : tabsStart;
 
     for (int i = 0; i < requiredTabs; i++) {
@@ -2014,13 +2015,13 @@ FileMenuOption showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& cur
     std::vector<FileMenuOption> options;
     std::vector<SMenuItem> menuItems = makeOptionsForFileMenu(options, selectedFileName);
 
-    std::string description = "Choose a folder to open at startup.\nOtherwise, the last game's folder opens.";
+    std::string description = "如果未设置默认文件夹位置,启动时将会自动定位到\n上次运行ROM所在的文件夹";
     if (std::find(options.begin(), options.end(), FileMenuOption::RescanDir) != options.end())
-        description += "\nRefresh the ROM list after adding or removing ROMs.";
+        description += "\n如果ROM文件变更,请刷新ROM列表";
     
     int optionIndex = menu3dsShowDialog(
         dialogTab, isDialog, currentMenuTab, menuTabs, 
-        "Options",
+        "文件菜单设置", 
         description,
         Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, 
         menuItems
@@ -2058,13 +2059,13 @@ FileMenuOption showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& cur
             
         case FileMenuOption::RescanDir:
         {
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Refresh ROM List", "Scanning folder...",
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "刷新ROM列表", "正在重新扫描目录...",
                 Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, std::vector<SMenuItem>(), -1, false);
 
             file3dsDeleteCurrentDirCache();
             updateFileMenuTab(NULL, false);
 
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Refresh ROM List", "ROM list refreshed.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "刷新ROM列表", "ROM列表刷新成功", Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);
             
             break;
         }
@@ -2072,9 +2073,9 @@ FileMenuOption showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& cur
         case FileMenuOption::DeleteGame:
         {
             char message[NAME_MAX + 64];
-            snprintf(message, sizeof(message), "Delete \"%s\" from the SD card? This cannot be undone.", selectedFileName);
+            snprintf(message, sizeof(message), "确定要从你的SD卡删除 \"%s\" 吗?操作无法撤销", selectedFileName);
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs, true);
-            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Delete Game", message, true, false);
+            bool confirmed = confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除游戏", message, true, false);
 
             if (confirmed) {
                 // if current selected game is also last selected game, reset lastSelectedFilename
@@ -2084,7 +2085,7 @@ FileMenuOption showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& cur
 
                 char path[PATH_MAX];
                 snprintf(path, sizeof(path), "%s%s", file3dsGetCurrentDir(), selectedFileName);
-                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Delete Game", "Deleting...",
+                menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除游戏", "正在删除...",
                     Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, std::vector<SMenuItem>(), -1, false);
                 
                 if (remove(path) == 0) {
@@ -2104,11 +2105,11 @@ FileMenuOption showFileMenuOptions(SMenuTab& dialogTab, bool& isDialog, int& cur
 
                     updateFileMenuTab(listIsEmpty ? NULL : nextSelectedFilename, false);
 
-                    snprintf(message, sizeof(message), "\"%s\" deleted.", selectedFileName);
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Delete Game", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);                
+                    snprintf(message, sizeof(message), "\"%s\" 已从SD卡删除", selectedFileName);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除游戏", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorSuccess, menu3dsMakeOptionsForOk(), -1, false);                
                 } else {
-                    snprintf(message, sizeof(message), "Could not delete \"%s\".", selectedFileName);
-                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Delete Game", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
+                    snprintf(message, sizeof(message), "无法删除 \"%s\"", selectedFileName);
+                    menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除游戏", message, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
                 }
             }
             break;
@@ -2160,20 +2161,20 @@ void showCheatInfo(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, int
 
     std::string body = std::string(cheat.name) + "\n\n"
         + (cheat.game_genie ? "Game Genie " : "Pro Action Replay ")
-        + (cheat.num_parts > 1 ? "Codes:\n" : "Code:\n") + codes;
+        + (cheat.num_parts > 1 ? "代码:\n" : "代码:\n") + codes;
 
-    showInfoDialog(dialogTab, isDialog, currentMenuTab, "Cheat Details", body);
+    showInfoDialog(dialogTab, isDialog, currentMenuTab, "金手指详情", body);
 }
 
 static void showCheatsHelp(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab) {
     const char *info =
-        "Game Genie codes show \"!\" when selected and may depend on the game version. "
-        "Pro Action Replay codes are usually more compatible. Disabling cheats may not undo their effects. "
-        "If the game glitches, disable all cheats and reset.\n\n"
-        "(alt N): another code for the same effect. Try it if the first one does not work.\n"
-        "[Rev N]: made for that revision of the game but may work with other revisions too.";
+        "Game Genie 代码当选中时会显示 \"!\" 并且可能依赖于游戏版本"
+        "Pro Action Replay 代码通常更兼容,但禁用金手指可能不会撤销其效果"
+        "如果游戏出现故障,请禁用所有金手指并重置\n"
+        "(alt N): 表示用于相同效果的另一个代码.若第一个不起作用,请尝试它\n"
+        "[Rev N]: 表示为该Rev版本的游戏制作,但也可能适用于其他版本";
 
-    showInfoDialog(dialogTab, isDialog, currentMenuTab, "Cheats Help", info);
+    showInfoDialog(dialogTab, isDialog, currentMenuTab, "金手指帮助", info);
 }
 
 static void deleteCheat(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, int cheatIndex) {
@@ -2184,8 +2185,8 @@ static void deleteCheat(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab
     ui3dsEllipsize(Cheat.c[cheatIndex].name, name, sizeof(name), menu3dsGetDialogTextWidth());
 
     char message[sizeof(name) + 128];
-    snprintf(message, sizeof(message), "Delete \"%s\"? Downloaded cheats can be restored with Online Updater.", name);
-    if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Delete Cheat", message, true, false))
+    snprintf(message, sizeof(message), "删除 \"%s\"? 下载的金手指可以通过在线更新功能恢复", name);
+    if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除金手指", message, true, false))
         return;
 
     // Sync pending toggles before rebuilding the menu.
@@ -2213,15 +2214,15 @@ void showCheatsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab)
     int cheatIndex = cheatIndexForRow(cheatMenu, menuTabs[TAB_CHEATS].SelectedItemIndex);
 
     std::vector<SMenuItem> options;
-    AddMenuDialogOption(options, OPTION_HELP, "Help", "");
+    AddMenuDialogOption(options, OPTION_HELP, "帮助", "");
     if (menu3dsGetCheatsActive() > 0)
-        AddMenuDialogOption(options, OPTION_DISABLE_ALL, "Disable all cheats", "");
+        AddMenuDialogOption(options, OPTION_DISABLE_ALL, "禁用所有代码", "");
     else
-        AddMenuDisabledOption(options, "Disable all cheats", OPTION_DISABLE_ALL);
-    AddMenuDialogOption(options, OPTION_DELETE, "Delete selected cheat", "");
+        AddMenuDisabledOption(options, "禁用所有代码", OPTION_DISABLE_ALL);
+    AddMenuDialogOption(options, OPTION_DELETE, "删除选中的金手指", "");
 
-    const char *text = "Press [SELECT] on a cheat to see its full name and code.";
-    int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Options", text,
+    const char *text = "在金手指上按 [SELECT] 查看其完整名称和代码";
+    int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "选项", text,
         Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, options);
 
     if (option == OPTION_DISABLE_ALL) {
@@ -2243,11 +2244,11 @@ void showCheatsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab)
 
 void showAchievementsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab) {
     std::vector<SMenuItem> options;
-    AddMenuDialogOption(options, 1, "Help", "");
-    AddMenuDialogOption(options, 0, "Refresh badge images", ra3dsGetBadgeCacheDate());
+    AddMenuDialogOption(options, 1, "帮助", "");
+    AddMenuDialogOption(options, 0, "刷新徽章图片", ra3dsGetBadgeCacheDate());
 
     int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs,
-        "Options", "Press [SELECT] to read long text in full. Refresh badge images\nif the artwork changed on RetroAchievements.",
+        "选项", "按 [SELECT] 查看完整文本.如果 RetroAchievements 上的资源发生变化,\n请刷新徽章图片",
         Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, options);
 
     if (option == 0) {
@@ -2256,23 +2257,23 @@ void showAchievementsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMe
         getBadgePath(ra3dsGetLoadedGameId(), path, sizeof(path));
         remove(path);
 
-        dialogTab.SetTitle("Refresh Badge Images");
+        dialogTab.SetTitle("刷新徽章图片");
         dialogTab.DialogText.assign(ra3dsGetGameTitle());
         menu3dsRunBadgeCache(dialogTab, currentMenuTab, menuTabs);
     } else if (option == 1) {
         char info[512];
         snprintf(info, sizeof(info),
-            "This emulator records unlocks in Casual mode (Softcore). Hardcore mode is not supported.\n\n"
-            "%c To mark a game as beaten, unlock all %c progression achievements and at least one %c win condition achievement.\n\n"
-            "%c Missable: Can be missed permanently.\n"
-            "%c Unlock Rate: Share of players who unlocked it.\n"
-            "%c Status: Where you are in the game right now.",
+            "本模拟器在休闲模式(普通模式)下记录解锁情况.困难模式不受支持\n"
+            "%c 要标记游戏为通关,请解锁所有 %c 进度类成就,并至少解锁一个 %c 胜利条件类成就\n"
+            "%c 可忽略: 表示可以永久忽略\n"
+            "%c 解锁率: 解锁该成就的玩家比例\n"
+            "%c 状态: 您当前在游戏中的进度",
             ra3dsTag(RA_TAG_BEATEN_PROGRESS).glyph, ra3dsTag(RA_TAG_PROGRESSION).glyph, ra3dsTag(RA_TAG_WIN).glyph,
             ra3dsTag(RA_TAG_MISSABLE).glyph,
             ra3dsTag(RA_TAG_UNLOCK_RATE).glyph,
             ra3dsTag(RA_TAG_RICH_PRESENCE).glyph);
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs, true);
-        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements Help", info,
+        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "RetroAchievements帮助", info,
             Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, menu3dsMakeOptionsForOk());
     }
 
@@ -2295,7 +2296,7 @@ void onDirectoryEntrySelected(
         char basename[NAME_MAX + 1];
         utils3dsGetBasename(romFileName, basename, sizeof(basename), false);
         updaterCancelSync();
-        menu3dsRunRomLoadingDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Load Game", basename, Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, romFileName);
+        menu3dsRunRomLoadingDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "加载游戏", basename, Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, romFileName);
         
         // Apply pending cheat changes before saving the previous game's SRAM and auto savestate.
         if (syncCheatsFromMenu(cheatMenu, true)) {
@@ -2306,7 +2307,7 @@ void onDirectoryEntrySelected(
         
         if (!runNextGame) {
             menu3dsHideRomLoadingDialog(dialogTab, isDialog, currentMenuTab, menuTabs, romFileName);
-            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "Load Game", "Unable to load this game.", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk());
+            menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "加载游戏", "无法加载该游戏", Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk());
             menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
         } else {
             menu3dsRunBadgeCache(dialogTab, currentMenuTab, menuTabs, romFileName);
@@ -2382,8 +2383,8 @@ void showMenu() {
     static bool audioErrorShown = false;
     if (snd3DS.audioType == 0 && !audioErrorShown) {
         audioErrorShown = true;
-        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "DSP firmware missing",
-            "Games will still run, but without sound. To enable in-game audio, dump the DSP firmware to /3ds/dspfirm.cdc.",
+        menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "找不到DSP固件",
+            "游戏仍然可以运行,但没有声音.要启用游戏内音频,\n请将DSP固件导出到/3ds/dspfirm.cdc",
             Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk());
         menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
     }
@@ -2811,6 +2812,7 @@ int main(int argc, char **argv)
     if (!emulatorInitialize()) {
         return emulatorFinalize();
     }
+    gbk3dsLoadGBKImage();
 
     if (!file3dsThumbnailsAvailableByType(settings3DS.GameThumbnailType))
         settings3DS.GameThumbnailType = Setting::ThumbnailMode::None;
@@ -2819,7 +2821,7 @@ int main(int argc, char **argv)
 
     session3DS.emulatorState = EMUSTATE_PAUSEMENU;
     updater3dsStartAutoCheck();
-    
+
     while (aptMainLoop() && session3DS.emulatorState != EMUSTATE_END) {
         switch (session3DS.emulatorState) {
             case EMUSTATE_PAUSEMENU:

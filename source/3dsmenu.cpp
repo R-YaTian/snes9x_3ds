@@ -93,7 +93,7 @@ static int menu3dsGetLoadingDialogMinHeight()
 
 static int menu3dsGetDialogBottomHeight(int items)
 {
-    return menu3dsGetDialogDividerHeight() + DIALOG_ITEMS_PADDING * 2 + (items - 1) * (FONT_HEIGHT + 2) + MENU_ITEM_HEIGHT - 1;
+    return menu3dsGetDialogDividerHeight() + DIALOG_ITEMS_PADDING * 2 + (items - 1) * FONT_HEIGHT + MENU_ITEM_HEIGHT - 1;
 }
 
 static void menu3dsGetDialogLayout(int& topHeight, int& bottomHeight)
@@ -320,7 +320,7 @@ void menu3dsDrawItems(
         if (currentTab->SelectedItemIndex == i)
         {
             if (selectedItemBackColor != -1) {
-                ui3dsDrawRect(0, y, settings3DS.SecondScreenWidth, y + MENU_ITEM_HEIGHT, selectedItemBackColor);
+                ui3dsDrawRect(0, y, settings3DS.SecondScreenWidth, y + MENU_ITEM_HEIGHT - 1, selectedItemBackColor);
             }
 
             int xi = horizontalPadding - offsetX;
