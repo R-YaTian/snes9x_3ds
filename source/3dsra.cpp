@@ -409,7 +409,7 @@ static void raLoginCallback(int result, const char *errorMessage, rc_client_t *c
             raStoreCredentials(user->username, user->token);
         log3dsWrite("[RA] login ok: %s", user ? user->display_name : "");
     } else {
-        snprintf(raLastError, sizeof(raLastError), "%s", errorMessage ? errorMessage : "unknown");
+        snprintf(raLastError, sizeof(raLastError), "%s", errorMessage ? errorMessage : "未知原因");
         log3dsWrite("[RA] login failed: %s", raLastError);
 
         // Clear invalid tokens so automatic login does not retry them at startup.
@@ -847,7 +847,7 @@ RaLoginResult ra3dsPromptLogin()
         return RA_LOGIN_CANCELLED;
 
     if(osGetWifiStrength() == 0) {
-        snprintf(raLastError, sizeof(raLastError), "%s", RA_NO_WIFI);
+        snprintf(raLastError, sizeof(raLastError), "%s", "无可用的Wi-Fi连接");
         return RA_LOGIN_FAILED;
     }
 

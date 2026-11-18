@@ -30,7 +30,7 @@ static const int DIALOG_TEXT_BOTTOM = 23;
 static const int LOADING_DIALOG_NAME_LINES = 2;
 static const int LOADING_DIALOG_STATUS_GAP = 6;
 
-static const int MENU_LIST_TOP    = 29;
+static const int MENU_LIST_TOP    = 26;
 static const int MENU_LIST_BOTTOM = SCREEN_HEIGHT - 20;
 
 static bool swapBuffer = true;
@@ -282,8 +282,9 @@ void menu3dsDrawItems(
     int subtitleTextColor,
     int offsetX = 0)
 {
-    int fontHeight = 13;
-    
+    int fontHeight = FONT_HEIGHT;
+    int fontLineHeight = FONT_LINE_HEIGHT;
+
     // Display the subtitle
     if (!currentTab->SubTitle.empty())
     {
@@ -300,8 +301,8 @@ void menu3dsDrawItems(
             subtitleRight > horizontalPadding ? subtitleRight - horizontalPadding : 0);
         ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, horizontalPadding, menuStartY, subtitleRight, menuStartY + fontHeight,
             subtitleTextColor, HALIGN_LEFT, ellipsizedSubTitle);
-        ui3dsDrawRect(horizontalPadding, menuStartY + fontHeight - 1, settings3DS.SecondScreenWidth - horizontalPadding, menuStartY + fontHeight, subtitleTextColor);
-        menuStartY += fontHeight;
+        ui3dsDrawRect(horizontalPadding, menuStartY + fontLineHeight, settings3DS.SecondScreenWidth - horizontalPadding, menuStartY + fontLineHeight + 1, subtitleTextColor);
+        menuStartY += fontLineHeight + 1;
     }
 
     int line = 0;
@@ -338,7 +339,8 @@ void menu3dsDrawItems(
         {
             color = headerItemTextColor;
             ui3dsDrawStringWithNoWrapping(settings3DS.SecondScreen, horizontalPadding, y, settings3DS.SecondScreenWidth - horizontalPadding, y + fontHeight, color, HALIGN_LEFT, currentTab->MenuItems[i].Text.c_str());
-            ui3dsDrawRect(horizontalPadding, y + fontHeight - 1, settings3DS.SecondScreenWidth - horizontalPadding, y + fontHeight, color);
+            ui3dsDrawRect(horizontalPadding, y + fontLineHeight, settings3DS.SecondScreenWidth - horizontalPadding, y + fontLineHeight + 1, color);
+            menuStartY += 2;
         }
         else if (currentTab->MenuItems[i].Type == MenuItemType::Header2)
         {

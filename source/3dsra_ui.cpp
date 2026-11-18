@@ -116,19 +116,19 @@ static const int RA_ACH_THUMB_SIZE = 60;
 static const int RA_ROW_RIGHT_GAP = 8;
 
 static const RaTag raTags[RA_TAG_COUNT] = {
-    { UI_ICON_LOCK, "Locked" },                     // RA_TAG_STANDARD
-    { UI_ICON_INFO, "Missable" },                   // RA_TAG_MISSABLE
-    { UI_ICON_CHART, "Progression" },               // RA_TAG_PROGRESSION
-    { UI_ICON_MEDAL, "Win Condition" },             // RA_TAG_WIN
-    { UI_ICON_CHECKMARK, "Unlocked" },              // RA_TAG_UNLOCKED
-    { '?', "Unsupported" },                         // RA_TAG_UNSUPPORTED
-    { UI_ICON_TROPHY, "Achievements" },             // RA_TAG_ACHIEVEMENTS
-    { UI_ICON_STACK, "Points" },                    // RA_TAG_POINTS
-    { UI_ICON_PEOPLE, "Unlock Rate" },              // RA_TAG_UNLOCK_RATE
-    { UI_ICON_FLAG_CHECKERED, "Beaten Progress" },  // RA_TAG_BEATEN_PROGRESS
-    { UI_ICON_CLOCK, "Beaten" },                    // RA_TAG_BEATEN
-    { UI_ICON_CLOCK, "Completed" },                 // RA_TAG_MASTERED
-    { UI_ICON_SPEECH_BUBBLE, "Status" },            // RA_TAG_RICH_PRESENCE
+    { UI_ICON_LOCK, "未解锁" },                     // RA_TAG_STANDARD
+    { UI_ICON_INFO, "易错过" },                   // RA_TAG_MISSABLE
+    { UI_ICON_CHART, "进度类" },               // RA_TAG_PROGRESSION
+    { UI_ICON_MEDAL, "通关条件类" },             // RA_TAG_WIN
+    { UI_ICON_CHECKMARK, "已解锁" },              // RA_TAG_UNLOCKED
+    { '?', "不受支持" },                         // RA_TAG_UNSUPPORTED
+    { UI_ICON_TROPHY, "成就" },             // RA_TAG_ACHIEVEMENTS
+    { UI_ICON_STACK, "积分类" },                    // RA_TAG_POINTS
+    { UI_ICON_PEOPLE, "解锁率" },              // RA_TAG_UNLOCK_RATE
+    { UI_ICON_FLAG_CHECKERED, "通关进度" },  // RA_TAG_BEATEN_PROGRESS
+    { UI_ICON_CLOCK, "已通关" },                    // RA_TAG_BEATEN
+    { UI_ICON_CLOCK, "完美通关" },                 // RA_TAG_MASTERED
+    { UI_ICON_SPEECH_BUBBLE, "状态" },            // RA_TAG_RICH_PRESENCE
 };
 
 static_assert((int)RA_TAG_STANDARD == (int)RA_ACH_TYPE_STANDARD &&
@@ -170,7 +170,7 @@ void ra3dsGetSubPageItemInfo(int achievementIndex, char *title, size_t titleSize
         snprintf(title, titleSize, "%s", ra3dsGetGameTitle());
         ra3dsGetRichPresence(body, bodySize);
         if (!body[0])
-            snprintf(body, bodySize, "No status reported for this game.");
+            snprintf(body, bodySize, "该游戏暂无状态信息");
         return;
     }
 
@@ -217,12 +217,12 @@ static void buildGameSummaryFooter(const std::vector<RaAchievementInfo>& achieve
                  progressUnlocked + winUnlocked, progressTotal + winTotal, progressPart, winPart);
     }
     else
-        snprintf(line1, sizeof(line1), "%c Unlocked: %d/%d  \267  %c %s: %d/%d",
+        snprintf(line1, sizeof(line1), "%c 已解锁: %d/%d  \267  %c %s: %d/%d",
                  raTags[RA_TAG_ACHIEVEMENTS].glyph, summary.unlocked, summary.total,
                  raTags[RA_TAG_POINTS].glyph, raTags[RA_TAG_POINTS].label,
                  summary.pointsUnlocked, summary.pointsTotal);
 
-    char richPresence[192];
+    char richPresence[256];
     ra3dsGetRichPresence(richPresence, sizeof(richPresence));
 
     if (richPresence[0])
@@ -286,14 +286,14 @@ static void ra3dsDrawAchievementFooter(int selectedIndex, int footerTop, int foo
     int footerBottom = footerTop + footerHeight - RA_FOOTER_BOTTOM_PAD;
     // Match the normal thumbnail placement.
     bool raTheme = settings3DS.Theme == Setting::Theme::RetroArch;
-    int thumbX1 = settings3DS.SecondScreenWidth - (raTheme ? 8 : 0);
+    int thumbX1 = settings3DS.SecondScreenWidth - (raTheme ? 8 + 4 : 0);
     int thumbX0 = thumbX1 - RA_ACH_THUMB_SIZE;
-    int thumbY1 = SCREEN_HEIGHT - (raTheme ? 18 : 20);
+    int thumbY1 = SCREEN_HEIGHT - (raTheme ? 18 + 4 : 20);
     int thumbY0 = thumbY1 - RA_ACH_THUMB_SIZE;
     int textRight = thumbX0 - RA_FOOTER_GAP;
     // Align with the menu rows.
     int textLeft = RA_H_PAD + ui3dsGetStringWidth(MENU_PREFIX_FILE);
-    int lineY = raTheme ? thumbY0 : footerTop;
+    int lineY = raTheme ? thumbY0 + 1 : footerTop;
 
     ui3dsDrawRect(RA_H_PAD, lineY, textRight, lineY + 1, highlightColor);
 
@@ -327,7 +327,7 @@ static void ra3dsDrawAchievementFooter(int selectedIndex, int footerTop, int foo
         if (bottom) {
             // Fit the body within the remaining footer height.
             int bodyY = y + RA_FOOTER_BODY_GAP;
-            int bodyLines = (footerBottom - bodyY) / FONT_LINE_HEIGHT;
+            int bodyLines = (footerBottom - bodyY) / FONT_HEIGHT;
             ui3dsDrawStringWithWrapping(settings3DS.SecondScreen,
                 textLeft, bodyY,
                 textRight, footerBottom, descriptionColor, HALIGN_LEFT,
@@ -372,7 +372,7 @@ static SMenuItem buildAchievementRow(const RaAchievementInfo& achievement, int a
 
     char suffix[64];
     if (achievement.unsupported)
-        snprintf(suffix, sizeof(suffix), " (%d) (Unsupported)", achievement.points);
+        snprintf(suffix, sizeof(suffix), " (%d) (不受支持)", achievement.points);
     else if (marker)
         snprintf(suffix, sizeof(suffix), " (%d)%s%s %c%c", achievement.points,
                  progress[0] ? " " : "", progress, marker, marker2);
@@ -413,7 +413,7 @@ static void buildAchievementsSubPage(SMenuTab& tab, u32 selectAchievementId,
     tab.SubTitle.assign(ra3dsGetGameTitle());
 
     char gameIdLabel[24];
-    snprintf(gameIdLabel, sizeof(gameIdLabel), "Game ID: %u", (unsigned)ra3dsGetLoadedGameId());
+    snprintf(gameIdLabel, sizeof(gameIdLabel), "游戏ID: %u", (unsigned)ra3dsGetLoadedGameId());
     tab.SubTitleRight.assign(gameIdLabel);
     tab.MenuItems.emplace_back(nullptr, MenuItemType::Action,
         menu3dsSubPageBackLabel(), "", -1);
@@ -474,8 +474,8 @@ bool ra3dsAppendMenuEntry(std::vector<SMenuItem>& items) {
         return false;
 
     if (summary.total == 0) {
-        items.emplace_back(nullptr, MenuItemType::Disabled, std::string("  Achievements"),
-                           std::string("No achievements yet"));
+        items.emplace_back(nullptr, MenuItemType::Disabled, std::string("  成就"),
+                           std::string("该游戏暂无成就"));
     } else {
         char stats[32];
         snprintf(stats, sizeof(stats), "%c %d/%d  \267  %c %d/%d  \233",
@@ -484,13 +484,13 @@ bool ra3dsAppendMenuEntry(std::vector<SMenuItem>& items) {
 
         // Enter from the outer loop; changing this tab inside its item callback
         // would destroy the callback while it is still running.
-        items.emplace_back(nullptr, MenuItemType::Action, std::string("  Achievements"),
+        items.emplace_back(nullptr, MenuItemType::Action, std::string("  成就"),
                            std::string(stats), MENU_ENTER_SUBPAGE - SUBPAGE_RETRO_ACHIEVEMENTS);
     }
 
     // Retry state is client-wide, not game-specific.
     if (ra3dsHasUnsyncedUnlocks())
-        items.emplace_back(nullptr, MenuItemType::Note, "  Some unlocks haven't synced yet. Retrying in the background.", "");
+        items.emplace_back(nullptr, MenuItemType::Note, "  某些解锁进度尚未同步.正在后台重试", "");
 
     return true;
 }

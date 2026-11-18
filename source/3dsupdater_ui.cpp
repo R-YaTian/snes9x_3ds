@@ -213,7 +213,7 @@ static bool runAssetDownload(const AssetDownload& asset, UpdaterDownloadResult *
     if(askFirst) {
         char prompt[256];
         snprintf(prompt, sizeof(prompt),
-                 "%s 已存在于SD卡上.\n是否用在线版本替换?",
+                 "%s已存在于SD卡上.\n是否用在线版本替换?",
                  asset.replacePromptPrefix);
         if(!updaterConfirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs,
                                  asset.title, prompt)) {
@@ -274,7 +274,7 @@ static void chooseThumbnailUpdate(SMenuTab& dialogTab, bool& isDialog, int& curr
         dates.emplace_back(description);
     }
 
-    const char *message = "每种类型都有1000个缩略图,总计10-15 MB.";
+    const char *message = "每种类型都有1000个缩略图,总计10-15MB.";
 
     std::vector<SMenuItem> items = menu3dsMakePickerOptions(options, dates);
     items.insert(items.begin(), SMenuItem(nullptr, MenuItemType::Header2, "类型", assetDatesHeader()));
@@ -342,10 +342,10 @@ struct GameAsset {
 };
 
 static const GameAsset gameScreenAsset = {
-    "游戏画面背景", GAME_SCREEN_BG_DIR, ".png", "游戏画面背景为", reloadGameScreenBackground,
+    "游戏画面背景", GAME_SCREEN_BG_DIR, ".png", "游戏画面背景", reloadGameScreenBackground,
     &settings3DS.GameScreenBg, "可以在\"设置\" \273 \"游戏画面背景\"中选择" };
 static const GameAsset secondScreenAsset = {
-    "副屏幕背景", SECOND_SCREEN_BG_DIR, ".png", "副屏幕背景为", reloadSecondScreenBackground,
+    "副屏幕背景", SECOND_SCREEN_BG_DIR, ".png", "副屏幕背景", reloadSecondScreenBackground,
     &settings3DS.SecondScreenBg, "可以在\"设置\" \273 \"副屏幕背景\"中选择" };
 
 static const char *gameAssetHint(const GameAsset& kind)
@@ -452,7 +452,7 @@ static void reloadCheats(void)
 }
 
 static const GameAsset cheatAsset = {
-    "金手指", CHEATS_DIR, ".chx", "此游戏的金手指为", reloadCheats,
+    "金手指", CHEATS_DIR, ".chx", "此游戏的金手指", reloadCheats,
     NULL, "可以在\"金手指\"页面中查看" };
 
 static void runCheatUpdate(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab,

@@ -307,7 +307,7 @@ static void activateRaForRunningGame(SMenuTab& dialogTab, bool& isDialog, int& c
             snprintf(message, sizeof(message), "%s正在下载徽章: %d/%d",
                      prefix, downloadedCount, downloadCount);
         else
-            snprintf(message, sizeof(message), "%s正在保存徽章到 SD (~%.1f MB)...",
+            snprintf(message, sizeof(message), "%s正在保存徽章到SD卡 (~%.1f MB)...",
                      prefix, (double)ra3dsEstimateBadgeCacheBytes() / (1024.0 * 1024.0));
         showRaStatusDialog(dialogTab, isDialog, currentMenuTab, menuTabs, message, isDownloading ? "按 [B] 跳过" : "");
     });
@@ -401,7 +401,7 @@ static void appendRaGameItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAChallengeIndicators, val); });
         AddMenuCheckbox(items, "  在游戏屏幕上显示成就进度", settings3DS.RAProgressIndicator,
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAProgressIndicator, val); });
-        AddMenuCheckbox(items, "  返场模式(重新激活已解锁的成就)", settings3DS.RAEncoreMode,
+        AddMenuCheckbox(items, "  返场模式(重激活已解锁的成就)", settings3DS.RAEncoreMode,
             []( int val ) { CheckAndUpdateToggle(settings3DS.RAEncoreMode, val); });
         AddMenuNote(items, "  返场模式在重载游戏后生效");
         AddMenuSpacer(items);
@@ -469,7 +469,7 @@ static void makeSaveLoadItems(std::vector<SMenuItem>& items, std::vector<SMenuTa
 
                 if (result != SAVE_WRITE_OK) {
                     const char *failMessage = result == SAVE_WRITE_FAILED
-                        ? "保存失败.不完整的存档已被删除.请检查 SD 卡."
+                        ? "保存失败.不完整的存档已被删除.请检查SD卡."
                         : "保存失败.";
                     menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs, title, failMessage, Themes[static_cast<int>(settings3DS.Theme)].dialogColorWarn, menu3dsMakeOptionsForOk(), -1, false);
                     menu3dsHideDialog(dialogTab, isDialog, currentMenuTab, menuTabs);
@@ -628,7 +628,7 @@ void makeEmulatorMenu(std::vector<SMenuItem>& items, std::vector<SMenuTab>& menu
         });
 
 
-    AddMenuPicker(items, "  字体"_s, ""_s, menu3dsMakePickerOptions({"Tempesta", "Ronda"}), static_cast<int>(settings3DS.Font), DIALOG_TYPE_INFO, true,
+    AddMenuPicker(items, "  字体(仅适用于ASCII字符)"_s, ""_s, menu3dsMakePickerOptions({"Tempesta", "Ronda"}), static_cast<int>(settings3DS.Font), DIALOG_TYPE_INFO, true,
         []( int val ) { if ( CheckAndUpdate( settings3DS.Font, static_cast<Setting::Font>(val) ) ) { ui3dsSetFont(); menu3dsMarkAllTabsDirty(); } });
 
     AddMenuPicker(items, "  游戏屏幕"_s, "选择使用上屏或下屏进行游玩"_s, menu3dsMakePickerOptions({"上屏", "下屏"}), settings3DS.GameScreen, DIALOG_TYPE_INFO, true,
@@ -2168,11 +2168,11 @@ void showCheatInfo(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab, int
 
 static void showCheatsHelp(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab) {
     const char *info =
-        "Game Genie 代码当选中时会显示 \"!\" 并且可能依赖于游戏版本"
-        "Pro Action Replay 代码通常更兼容,但禁用金手指可能不会撤销其效果"
+        "Game Genie代码选中时会显示\"!\",且可能依赖游戏版本\n"
+        "Pro Action Replay代码通常更兼容,但禁用时可能仍有效\n"
         "如果游戏出现故障,请禁用所有金手指并重置\n"
-        "(alt N): 表示用于相同效果的另一个代码.若第一个不起作用,请尝试它\n"
-        "[Rev N]: 表示为该Rev版本的游戏制作,但也可能适用于其他版本";
+        "(alt N):表示相同效果的备案.若第一个无效,请尝试它\n"
+        "[Rev N]:表示为该Rev版本制作,但也可能适用其他版本";
 
     showInfoDialog(dialogTab, isDialog, currentMenuTab, "金手指帮助", info);
 }
@@ -2185,7 +2185,7 @@ static void deleteCheat(SMenuTab& dialogTab, bool& isDialog, int& currentMenuTab
     ui3dsEllipsize(Cheat.c[cheatIndex].name, name, sizeof(name), menu3dsGetDialogTextWidth());
 
     char message[sizeof(name) + 128];
-    snprintf(message, sizeof(message), "删除 \"%s\"? 下载的金手指可以通过在线更新功能恢复", name);
+    snprintf(message, sizeof(message), "删除 \"%s\"?\n下载的金手指可以通过在线更新功能恢复", name);
     if (!confirmDialog(dialogTab, isDialog, currentMenuTab, menuTabs, "删除金手指", message, true, false))
         return;
 
@@ -2248,7 +2248,7 @@ void showAchievementsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMe
     AddMenuDialogOption(options, 0, "刷新徽章图片", ra3dsGetBadgeCacheDate());
 
     int option = menu3dsShowDialog(dialogTab, isDialog, currentMenuTab, menuTabs,
-        "选项", "按 [SELECT] 查看完整文本.如果 RetroAchievements 上的资源发生变化,\n请刷新徽章图片",
+        "选项", "按 [SELECT] 查看完整文本.如果 RetroAchievements 上的资源发生变化,请刷新徽章图片",
         Themes[static_cast<int>(settings3DS.Theme)].dialogColorInfo, options);
 
     if (option == 0) {
@@ -2263,9 +2263,9 @@ void showAchievementsOptions(SMenuTab& dialogTab, bool& isDialog, int& currentMe
     } else if (option == 1) {
         char info[512];
         snprintf(info, sizeof(info),
-            "本模拟器在休闲模式(普通模式)下记录解锁情况.困难模式不受支持\n"
-            "%c 要标记游戏为通关,请解锁所有 %c 进度类成就,并至少解锁一个 %c 胜利条件类成就\n"
-            "%c 可忽略: 表示可以永久忽略\n"
+            "本模拟器在休闲模式(普通模式)下记录解锁情况.\n困难模式不受支持\n\n"
+            "%c 标记游戏为通关,需解锁所有 %c 进度类成就,\n并至少解锁一个 %c 通关条件类成就\n"
+            "%c 易错过: 可能永久错过的成就\n"
             "%c 解锁率: 解锁该成就的玩家比例\n"
             "%c 状态: 您当前在游戏中的进度",
             ra3dsTag(RA_TAG_BEATEN_PROGRESS).glyph, ra3dsTag(RA_TAG_PROGRESSION).glyph, ra3dsTag(RA_TAG_WIN).glyph,
